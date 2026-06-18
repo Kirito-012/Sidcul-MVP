@@ -1,19 +1,19 @@
 // SIDCUL Manufacturers Association — Hyper-Local Job Portal
-// Data model for the MVP: companies post jobs, students apply.
-// Roles, job types and statuses are stored as strings (SQLite has no enums).
+// MongoDB data model for the MVP: companies post jobs, students apply.
+// Roles, job types and statuses are stored as strings.
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
 }
 
 /// A single account. `role` is one of: STUDENT | COMPANY | ADMIN
 model User {
-  id           String   @id @default(cuid())
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
   email        String   @unique
   passwordHash String
   role         String   @default("STUDENT")
@@ -27,8 +27,8 @@ model User {
 
 /// Extra data for COMPANY accounts. Must be `verified` by an admin before posting.
 model CompanyProfile {
-  id          String   @id @default(cuid())
-  userId      String   @unique
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @unique @db.ObjectId
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   companyName String
   about       String?
@@ -43,8 +43,8 @@ model CompanyProfile {
 
 /// Extra data for STUDENT accounts.
 model StudentProfile {
-  id        String   @id @default(cuid())
-  userId    String   @unique
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @unique @db.ObjectId
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   fullName  String
   phone     String?
@@ -55,8 +55,8 @@ model StudentProfile {
 
 /// A job posting owned by a (verified) company.
 model Job {
-  id          String         @id @default(cuid())
-  companyId   String
+  id          String         @id @default(auto()) @map("_id") @db.ObjectId
+  companyId   String         @db.ObjectId
   company     CompanyProfile @relation(fields: [companyId], references: [id], onDelete: Cascade)
   title       String
   description String
@@ -72,10 +72,10 @@ model Job {
 
 /// A student's application to a job. One application per student per job.
 model Application {
-  id          String   @id @default(cuid())
-  jobId       String
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  jobId       String   @db.ObjectId
   job         Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  applicantId String
+  applicantId String   @db.ObjectId
   applicant   User     @relation(fields: [applicantId], references: [id], onDelete: Cascade)
   coverNote   String?
   status      String   @default("APPLIED") // APPLIED | REVIEWED | SHORTLISTED | REJECTED

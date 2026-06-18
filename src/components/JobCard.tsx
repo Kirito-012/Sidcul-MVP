@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { Job, CompanyProfile } from "@/generated/prisma/client";
+import type { Job, CompanyProfile } from "@prisma/client";
 import { JOB_TYPE_LABELS } from "@/lib/constants";
 
 type JobWithCompany = Job & { company: CompanyProfile };
