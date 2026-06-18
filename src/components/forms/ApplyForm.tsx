@@ -11,7 +11,8 @@ export default function ApplyForm({ jobId }: { jobId: string }) {
   if (state?.success) {
     return (
       <div className="rounded-lg bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
-        ✓ Application submitted! The company can now see your profile.
+        ✓ Application submitted! The company can now see your profile
+        {" "}and résumé.
       </div>
     );
   }
@@ -24,6 +25,19 @@ export default function ApplyForm({ jobId }: { jobId: string }) {
           {state.error}
         </p>
       )}
+      <div>
+        <label className="field-label" htmlFor="resume">
+          Résumé{" "}
+          <span className="font-normal text-muted">(PDF or Word, max 4 MB)</span>
+        </label>
+        <input
+          id="resume"
+          name="resume"
+          type="file"
+          accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          className="block w-full text-sm text-ink-700 file:mr-3 file:rounded-lg file:border-0 file:bg-ink file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-ink-700"
+        />
+      </div>
       <div>
         <label className="field-label" htmlFor="coverNote">
           Cover note <span className="font-normal text-muted">(optional)</span>

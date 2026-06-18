@@ -78,8 +78,22 @@ model Application {
   applicantId String   @db.ObjectId
   applicant   User     @relation(fields: [applicantId], references: [id], onDelete: Cascade)
   coverNote   String?
+  resume      Resume?
   status      String   @default("APPLIED") // APPLIED | REVIEWED | SHORTLISTED | REJECTED
   createdAt   DateTime @default(now())
 
   @@unique([jobId, applicantId])
+}
+
+/// An uploaded résumé file, stored as binary data in MongoDB. One per Application.
+/// The FK lives here (always non-null) so MongoDB's unique index never sees null dups.
+model Resume {
+  id            String      @id @default(auto()) @map("_id") @db.ObjectId
+  applicationId String      @unique @db.ObjectId
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  data          Bytes
+  filename      String
+  mimeType      String
+  size          Int
+  createdAt     DateTime    @default(now())
 }

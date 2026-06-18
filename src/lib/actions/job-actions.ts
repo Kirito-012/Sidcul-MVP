@@ -11,6 +11,13 @@ function str(formData: FormData, key: string): string {
   return String(formData.get(key) ?? "").trim();
 }
 
+const MAX_RESUME_BYTES = 4 * 1024 * 1024; // 4 MB
+const ALLOWED_RESUME_TYPES = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+];
+
 export async function createJobAction(
   _prev: ActionState,
   formData: FormData,
@@ -87,12 +94,54 @@ export async function applyAction(
     return { error: "This job is no longer open for applications." };
   }
 
+  // Validate the optional résumé up front (before writing anything).
+  let resumeData:
+    | { bytes: Uint8Array<ArrayBuffer>; filename: string; mimeType: string; size: number }
+    | undefined;
+  const file = formData.get("resume");
+  if (file instanceof File && file.size > 0) {
+    if (file.size > MAX_RESUME_BYTES) {
+      return { error: "Résumé must be smaller than 4 MB." };
+    }
+    if (!ALLOWED_RESUME_TYPES.includes(file.type)) {
+      return { error: "Résumé must be a PDF or Word document (.pdf, .doc, .docx)." };
+    }
+    const buffer = await file.arrayBuffer();
+    const bytes = new Uint8Array(buffer.byteLength);
+    bytes.set(new Uint8Array(buffer));
+    resumeData = {
+      bytes,
+      filename: file.name.slice(0, 200),
+      mimeType: file.type,
+      size: file.size,
+    };
+  }
+
+  // Block duplicates before creating the application.
+  const existing = await prisma.application.findUnique({
+    where: { jobId_applicantId: { jobId, applicantId: session.userId } },
+  });
+  if (existing) return { error: "You have already applied to this job." };
+
+  let application;
   try {
-    await prisma.application.create({
+    application = await prisma.application.create({
       data: { jobId, applicantId: session.userId, coverNote },
     });
   } catch {
     return { error: "You have already applied to this job." };
+  }
+
+  if (resumeData) {
+    await prisma.resume.create({
+      data: {
+        applicationId: application.id,
+        data: resumeData.bytes,
+        filename: resumeData.filename,
+        mimeType: resumeData.mimeType,
+        size: resumeData.size,
+      },
+    });
   }
 
   revalidatePath(`/jobs/${jobId}`);

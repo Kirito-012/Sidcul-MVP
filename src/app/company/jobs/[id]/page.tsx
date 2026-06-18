@@ -25,7 +25,10 @@ export default async function JobApplicantsPage({
     include: {
       applications: {
         orderBy: { createdAt: "desc" },
-        include: { applicant: { include: { studentProfile: true } } },
+        include: {
+          applicant: { include: { studentProfile: true } },
+          resume: { select: { id: true } },
+        },
       },
     },
   });
@@ -120,6 +123,21 @@ export default async function JobApplicantsPage({
                     {app.coverNote}
                   </div>
                 )}
+
+                <div className="mt-3">
+                  {app.resume ? (
+                    <a
+                      href={`/resume/${app.resume.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-outline btn-sm"
+                    >
+                      📄 View résumé
+                    </a>
+                  ) : (
+                    <span className="text-sm text-muted">No résumé attached</span>
+                  )}
+                </div>
               </div>
             );
           })}

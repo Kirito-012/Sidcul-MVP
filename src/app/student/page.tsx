@@ -18,7 +18,10 @@ export default async function StudentDashboard() {
 
   const applications = await prisma.application.findMany({
     where: { applicantId: session.userId },
-    include: { job: { include: { company: true } } },
+    include: {
+      job: { include: { company: true } },
+      resume: { select: { id: true } },
+    },
     orderBy: { createdAt: "desc" },
   });
 
@@ -62,6 +65,16 @@ export default async function StudentDashboard() {
                   {JOB_TYPE_LABELS[app.job.jobType] ?? app.job.jobType} ·{" "}
                   {app.job.location}
                 </p>
+                {app.resume && (
+                  <a
+                    href={`/resume/${app.resume.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-1 inline-block text-xs font-medium text-brand"
+                  >
+                    📄 Résumé attached — view
+                  </a>
+                )}
               </div>
               <span
                 className={`badge ${STATUS_STYLES[app.status] ?? "bg-slate-100 text-slate-600"}`}
