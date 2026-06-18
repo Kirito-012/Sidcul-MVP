@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SIDCUL Careers — Hyper-Local Industrial Job Portal (MVP)
 
-## Getting Started
+A job portal for the **SIDCUL Manufacturers Association** (IIE Haridwar industrial
+estate). Verified manufacturers post jobs; local talent (students / ITI / diploma
+holders) discovers and applies to them — replacing recruiters and paper directories.
 
-First, run the development server:
+This MVP implements the **Hyper-Local Job Portal** pillar from the association's
+directory concept deck.
+
+## Roles & flows
+
+- **Student** (open signup) → browse/search jobs → apply with a cover note → track
+  application status in "My Applications".
+- **Company** (signup, then **admin-verified** before posting) → post jobs →
+  review applicants → move them through Applied → Reviewed → Shortlisted → Rejected.
+- **Admin** → verify / revoke companies. Only verified companies' jobs are public.
+
+## Tech stack
+
+- **Next.js 16** (App Router) + **React 19** + **TypeScript**
+- **Tailwind CSS v4**
+- **Prisma 7 + SQLite** (via the `better-sqlite3` driver adapter)
+- **jose** (JWT session cookie) + **bcryptjs** (password hashing)
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run db:migrate   # create the SQLite schema (first time only)
+npm run db:seed      # load demo data
+npm run dev          # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Demo accounts (password for all: `password123`)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Role               | Email             |
+| ------------------ | ----------------- |
+| Admin              | admin@sidcul.in   |
+| Company (verified) | hr@akums.in       |
+| Company (verified) | hr@hul.in         |
+| Company (pending)  | hr@havells.in     |
+| Student            | rahul@student.in  |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+> Log in as **hr@havells.in** to see the "awaiting verification" state, then log
+> in as the admin to verify it.
 
-## Learn More
+## Useful scripts
 
-To learn more about Next.js, take a look at the following resources:
+- `npm run db:seed` — reset & reload demo data (rerunnable)
+- `npm run db:studio` — open Prisma Studio to inspect the database
+- `npm run db:reset` — drop & recreate the database
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+prisma/
+  schema.prisma          # data model (User, CompanyProfile, StudentProfile, Job, Application)
+  seed.ts                # demo data
+src/
+  app/                   # routes: /, /jobs, /jobs/[id], /login, /register,
+                         #         /company, /company/jobs/new, /company/jobs/[id],
+                         #         /student, /admin
+  components/            # Nav, JobCard, form components
+  lib/
+    prisma.ts            # Prisma client (SQLite adapter)
+    auth.ts              # sessions, password hashing, role guards
+    constants.ts         # roles, job types, sectors, statuses
+    actions/             # server actions (auth, jobs, admin)
+```
 
-## Deploy on Vercel
+## Notes / next steps
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- SQLite is used for zero-config local dev. Switching to Postgres is a one-line
+  change in `prisma/schema.prisma` + `DATABASE_URL`.
+- `AUTH_SECRET` in `.env` must be replaced with a long random value in production.
+- Possible follow-ups: editable student/company profiles, resume uploads, email
+  notifications, pagination, and richer search.

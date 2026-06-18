@@ -1,0 +1,85 @@
+// SIDCUL Manufacturers Association — Hyper-Local Job Portal
+// Data model for the MVP: companies post jobs, students apply.
+// Roles, job types and statuses are stored as strings (SQLite has no enums).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+/// A single account. `role` is one of: STUDENT | COMPANY | ADMIN
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  role         String   @default("STUDENT")
+  name         String
+  createdAt    DateTime @default(now())
+
+  companyProfile CompanyProfile?
+  studentProfile StudentProfile?
+  applications   Application[]
+}
+
+/// Extra data for COMPANY accounts. Must be `verified` by an admin before posting.
+model CompanyProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName String
+  about       String?
+  location    String?
+  website     String?
+  sector      String? // Pharmaceuticals | FMCG & Packaging | Electrical & Auto | Allied Services
+  verified    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  jobs Job[]
+}
+
+/// Extra data for STUDENT accounts.
+model StudentProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName  String
+  phone     String?
+  education String?
+  skills    String?
+  createdAt DateTime @default(now())
+}
+
+/// A job posting owned by a (verified) company.
+model Job {
+  id          String         @id @default(cuid())
+  companyId   String
+  company     CompanyProfile @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  location    String
+  jobType     String         @default("FULL_TIME") // FULL_TIME | PART_TIME | SHIFT | SEASONAL | INTERNSHIP
+  sector      String?
+  salary      String?
+  status      String         @default("OPEN") // OPEN | CLOSED
+  createdAt   DateTime       @default(now())
+
+  applications Application[]
+}
+
+/// A student's application to a job. One application per student per job.
+model Application {
+  id          String   @id @default(cuid())
+  jobId       String
+  job         Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  applicantId String
+  applicant   User     @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  coverNote   String?
+  status      String   @default("APPLIED") // APPLIED | REVIEWED | SHORTLISTED | REJECTED
+  createdAt   DateTime @default(now())
+
+  @@unique([jobId, applicantId])
+}
