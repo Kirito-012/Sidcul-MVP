@@ -23,7 +23,7 @@ export default function RegisterForm() {
         <button
           type="button"
           onClick={() => setRole("STUDENT")}
-          className={`rounded-lg border px-3 py-3 text-sm font-semibold transition ${
+          className={`cursor-pointer rounded-lg border px-3 py-3 text-sm font-semibold transition-colors ${
             role === "STUDENT"
               ? "border-brand bg-brand-50 text-brand-600"
               : "border-line bg-white text-ink-700 hover:border-brand/40"
@@ -34,10 +34,10 @@ export default function RegisterForm() {
         <button
           type="button"
           onClick={() => setRole("COMPANY")}
-          className={`rounded-lg border px-3 py-3 text-sm font-semibold transition ${
+          className={`cursor-pointer rounded-lg border px-3 py-3 text-sm font-semibold transition-colors ${
             role === "COMPANY"
-              ? "border-brand bg-brand-50 text-brand-600"
-              : "border-line bg-white text-ink-700 hover:border-brand/40"
+              ? "border-accent bg-accent-50 text-accent-600"
+              : "border-line bg-white text-ink-700 hover:border-accent/40"
           }`}
         >
           I&apos;m a company

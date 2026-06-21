@@ -97,3 +97,21 @@ model Resume {
   size          Int
   createdAt     DateTime    @default(now())
 }
+
+/// A read-only directory listing scraped from a public business directory.
+/// Represents an IT/tech company located in the SIDCUL IT Park, Dehradun.
+model DirectoryCompany {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  slug        String   @unique
+  category    String?
+  address     String?
+  area        String?
+  pincode     String?
+  phone       String?
+  email       String?
+  website     String?
+  description String?
+  sourceUrl   String   @unique
+  createdAt   DateTime @default(now())
+}

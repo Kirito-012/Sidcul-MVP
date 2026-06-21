@@ -35,8 +35,13 @@ export default async function JobsPage({
     : jobs;
 
   return (
-    <div className="mx-auto max-w-6xl px-5 py-10">
-      <h1 className="text-2xl font-bold text-ink">Open positions</h1>
+    <div className="mx-auto max-w-6xl px-5 py-10 sm:py-14">
+      <p className="mb-2 text-sm font-bold uppercase tracking-[0.2em] text-brand">
+        SIDCUL Haridwar
+      </p>
+      <h1 className="font-display text-3xl font-bold text-ink">
+        Open positions
+      </h1>
       <p className="mt-1 text-sm text-muted">
         {filtered.length} {filtered.length === 1 ? "job" : "jobs"} from verified
         SIDCUL manufacturers.
@@ -75,7 +80,7 @@ export default async function JobsPage({
       </form>
 
       {filtered.length === 0 ? (
-        <div className="card mt-8 p-10 text-center text-muted">
+        <div className="card mt-8 p-12 text-center text-muted">
           No jobs match your search. Try clearing the filters.
         </div>
       ) : (
