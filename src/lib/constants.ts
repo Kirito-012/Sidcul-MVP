@@ -15,6 +15,26 @@ export const SECTORS = [
 
 export type Sector = (typeof SECTORS)[number];
 
+/**
+ * Canonical directory taxonomy (distinct from the job-posting SECTORS above).
+ * `dbCategory` is the raw string stored on DirectoryCompany.category — kept
+ * separate from `label` so we can display a friendlier name (e.g. the scraped
+ * IT Park companies are stored as "Software Companies") without touching data.
+ */
+export const DIRECTORY_CATEGORIES = [
+  { label: "Pharmaceuticals", dbCategory: "Pharmaceuticals" },
+  { label: "IT & Software", dbCategory: "Software Companies" },
+  { label: "Electricals", dbCategory: "Electricals" },
+  { label: "Automobiles Manufacturer", dbCategory: "Automobiles Manufacturer" },
+  {
+    label: "Automobiles Component Manufacturer",
+    dbCategory: "Automobiles Component Manufacturer",
+  },
+  { label: "FMCG", dbCategory: "FMCG" },
+  { label: "Plastic Mould Manufacturer", dbCategory: "Plastic Mould Manufacturer" },
+  { label: "Printing & Packaging", dbCategory: "Printing & Packaging" },
+] as const;
+
 /** Job types skewed toward industrial/manufacturing hiring. */
 export const JOB_TYPES = [
   { value: "FULL_TIME", label: "Full-time" },

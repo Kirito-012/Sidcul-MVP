@@ -12,7 +12,8 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "prisma db push --force-reset",
     "db:studio": "prisma studio",
-    "scrape:directory": "tsx scripts/scrape-directory.ts"
+    "scrape:directory": "tsx scripts/scrape-directory.ts",
+    "seed:pharma": "tsx scripts/seed-pharma-directory.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

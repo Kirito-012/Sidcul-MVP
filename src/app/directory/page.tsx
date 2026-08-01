@@ -2,15 +2,15 @@ import { prisma } from "@/lib/prisma";
 import DirectoryCard from "@/components/DirectoryCard";
 
 export const metadata = {
-  title: "SIDCUL IT Park Directory — IT Companies in Dehradun",
+  title: "SIDCUL Business Directory — Companies in the Haridwar Estate",
 };
 
 export default async function DirectoryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; letter?: string }>;
 }) {
-  const { q } = await searchParams;
+  const { q, letter } = await searchParams;
 
   const companies = await prisma.directoryCompany.findMany({
     orderBy: { name: "asc" },
@@ -25,15 +25,26 @@ export default async function DirectoryPage({
     ),
   ).sort();
 
+  const activeLetter = letter?.trim().toUpperCase().slice(0, 1) || null;
   const needle = q?.trim().toLowerCase();
-  const filtered = needle
-    ? companies.filter(
-        (c) =>
-          c.name.toLowerCase().includes(needle) ||
-          (c.category ?? "").toLowerCase().includes(needle) ||
-          (c.address ?? "").toLowerCase().includes(needle),
-      )
-    : companies;
+  const filtered = companies.filter((c) => {
+    if (activeLetter && !c.name.trim().toUpperCase().startsWith(activeLetter)) {
+      return false;
+    }
+    if (needle) {
+      return (
+        c.name.toLowerCase().includes(needle) ||
+        (c.category ?? "").toLowerCase().includes(needle) ||
+        (c.address ?? "").toLowerCase().includes(needle)
+      );
+    }
+    return true;
+  });
+  const isFiltered = Boolean(needle || activeLetter);
+
+  const availableLetters = new Set(
+    companies.map((c) => c.name.trim().charAt(0).toUpperCase()),
+  );
 
   return (
     <div>
@@ -62,15 +73,15 @@ export default async function DirectoryPage({
             Industry Directory
           </p>
           <h1 className="mt-4 max-w-3xl font-display text-3xl font-bold leading-[1.08] sm:text-5xl">
-            SIDCUL IT Park{" "}
+            SIDCUL business{" "}
             <span className="bg-gradient-to-r from-accent to-emerald-300 bg-clip-text text-transparent">
               directory
             </span>
           </h1>
           <p className="mt-4 max-w-2xl text-[1.05rem] leading-relaxed text-slate-300">
-            A curated registry of {total}&nbsp;software &amp; IT companies based
-            in the SIDCUL IT Park, Sahastradhara Road, Dehradun — search,
-            explore, and connect.
+            A curated registry of {total}&nbsp;manufacturers and IT firms
+            across the SIDCUL Haridwar estate and the IT Park, Dehradun —
+            search, explore, and connect.
           </p>
 
           {/* Stat strip */}
@@ -104,7 +115,7 @@ export default async function DirectoryPage({
               className="w-full rounded-lg border-0 bg-transparent py-3 pl-12 pr-3 text-[0.98rem] text-ink outline-none placeholder:text-muted"
             />
           </div>
-          {needle && (
+          {isFiltered && (
             <a href="/directory" className="btn btn-ghost">
               Clear
             </a>
@@ -122,7 +133,7 @@ export default async function DirectoryPage({
             <a
               href="/directory"
               className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors duration-200 ${
-                !needle
+                !isFiltered
                   ? "border-ink bg-ink text-white"
                   : "border-line bg-white text-ink-700 hover:border-brand hover:text-brand"
               }`}
@@ -130,7 +141,7 @@ export default async function DirectoryPage({
               All
             </a>
             {sectors.map((sector) => {
-              const active = needle === sector.toLowerCase();
+              const active = !activeLetter && needle === sector.toLowerCase();
               return (
                 <a
                   key={sector}
@@ -148,10 +159,42 @@ export default async function DirectoryPage({
           </div>
         )}
 
+        {/* A–Z jump strip */}
+        <div className="mt-4 flex flex-wrap items-center gap-1.5">
+          <span className="label-tag mr-1 text-muted">Jump to</span>
+          {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letterChar) => {
+            const has = availableLetters.has(letterChar);
+            const active = activeLetter === letterChar;
+            if (!has) {
+              return (
+                <span
+                  key={letterChar}
+                  className="grid h-7 w-7 place-items-center rounded-md text-xs font-semibold text-line"
+                >
+                  {letterChar}
+                </span>
+              );
+            }
+            return (
+              <a
+                key={letterChar}
+                href={`/directory?letter=${letterChar}`}
+                className={`grid h-7 w-7 place-items-center rounded-md text-xs font-semibold transition-colors duration-200 ${
+                  active
+                    ? "bg-brand text-white"
+                    : "text-ink-700 hover:bg-brand-50 hover:text-brand"
+                }`}
+              >
+                {letterChar}
+              </a>
+            );
+          })}
+        </div>
+
         {/* Registry header */}
         <div className="mt-10 flex items-center justify-between border-b-2 border-ink pb-3">
           <p className="label-tag text-muted">
-            {needle ? (
+            {isFiltered ? (
               <>
                 Showing <span className="text-ink">{filtered.length}</span> /{" "}
                 {total}
@@ -171,7 +214,9 @@ export default async function DirectoryPage({
               <SearchIcon className="h-6 w-6" />
             </span>
             <p className="mt-4 font-display text-lg font-semibold text-ink">
-              No companies match “{q}”
+              {needle
+                ? `No companies match "${q}"`
+                : `No companies start with "${activeLetter}"`}
             </p>
             <p className="mt-1 max-w-sm text-sm text-muted">
               Try a shorter or different term — for example a company name or

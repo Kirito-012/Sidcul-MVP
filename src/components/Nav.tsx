@@ -13,7 +13,7 @@ export default async function Nav() {
             S
           </span>
           <span className="font-display text-lg font-bold tracking-tight text-ink">
-            SIDCUL <span className="text-accent">Careers</span>
+            SIDCUL <span className="text-accent">Directory</span>
           </span>
         </Link>
 

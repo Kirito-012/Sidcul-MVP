@@ -21,9 +21,9 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SIDCUL Careers — Hyper-Local Industrial Jobs, Haridwar",
+  title: "SIDCUL Careers — Company Directory, Haridwar Industrial Estate",
   description:
-    "The official job portal of the SIDCUL Manufacturers Association. Verified manufacturers in the Haridwar industrial estate hire local talent directly.",
+    "The official company directory of the SIDCUL Manufacturers Association. Browse verified manufacturers and IT firms in the Haridwar industrial estate, and see their open roles.",
 };
 
 export default function RootLayout({
