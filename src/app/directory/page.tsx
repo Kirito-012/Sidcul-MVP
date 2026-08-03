@@ -1,5 +1,9 @@
+import Link from "next/link";
+import type { DirectoryCompany } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import DirectoryCard from "@/components/DirectoryCard";
+import { DIRECTORY_CATEGORIES } from "@/lib/constants";
+
+const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
 export const metadata = {
   title: "SIDCUL Business Directory — Companies in the Haridwar Estate",
@@ -17,16 +21,18 @@ export default async function DirectoryPage({
   });
   const total = companies.length;
 
-  const sectors = Array.from(
-    new Set(
-      companies
-        .map((c) => c.category?.trim())
-        .filter((c): c is string => Boolean(c)),
-    ),
-  ).sort();
+  const categoryCounts = new Map<string, number>();
+  for (const c of companies) {
+    if (!c.category) continue;
+    categoryCounts.set(c.category, (categoryCounts.get(c.category) ?? 0) + 1);
+  }
 
   const activeLetter = letter?.trim().toUpperCase().slice(0, 1) || null;
   const needle = q?.trim().toLowerCase();
+  const activeCategory = DIRECTORY_CATEGORIES.find(
+    (cat) => needle === cat.dbCategory.toLowerCase(),
+  );
+
   const filtered = companies.filter((c) => {
     if (activeLetter && !c.name.trim().toUpperCase().startsWith(activeLetter)) {
       return false;
@@ -48,215 +54,247 @@ export default async function DirectoryPage({
 
   return (
     <div>
-      {/* Header band */}
-      <section className="relative overflow-hidden bg-ink text-white">
-        {/* Engineering grid that fades toward the search bar */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.10]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,0.7) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.7) 1px, transparent 1px)",
-            backgroundSize: "44px 44px",
-            maskImage:
-              "radial-gradient(120% 80% at 30% 0%, #000 35%, transparent 85%)",
-            WebkitMaskImage:
-              "radial-gradient(120% 80% at 30% 0%, #000 35%, transparent 85%)",
-          }}
-        />
-        {/* Ambient color glows */}
-        <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-brand/30 blur-3xl" />
-        <div className="pointer-events-none absolute -left-32 bottom-0 h-72 w-72 rounded-full bg-accent/15 blur-3xl" />
-
-        <div className="relative mx-auto max-w-6xl px-5 pb-24 pt-14 sm:pt-16">
-          <p className="label-tag text-accent">
-            <span className="inline-block h-2 w-2 bg-accent" />
-            Industry Directory
-          </p>
-          <h1 className="mt-4 max-w-3xl font-display text-3xl font-bold leading-[1.08] sm:text-5xl">
-            SIDCUL business{" "}
-            <span className="bg-gradient-to-r from-accent to-emerald-300 bg-clip-text text-transparent">
-              directory
-            </span>
+      {/* Slim functional header — not a marketing hero */}
+      <section className="border-b border-line bg-white">
+        <div className="mx-auto max-w-6xl px-5 py-8 sm:py-10">
+          <p className="label-tag text-brand">Industry Directory</p>
+          <h1 className="mt-2 font-display text-2xl font-bold text-ink sm:text-3xl">
+            SIDCUL business directory
           </h1>
-          <p className="mt-4 max-w-2xl text-[1.05rem] leading-relaxed text-slate-300">
-            A curated registry of {total}&nbsp;manufacturers and IT firms
-            across the SIDCUL Haridwar estate and the IT Park, Dehradun —
-            search, explore, and connect.
+          <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-muted sm:text-[0.95rem]">
+            A curated registry of {total} manufacturers and IT firms across
+            the SIDCUL Haridwar industrial estate.
           </p>
 
-          {/* Stat strip */}
-          <dl className="mt-9 flex flex-wrap items-stretch gap-x-8 gap-y-5 border-t border-white/10 pt-6">
-            <Stat value={String(total)} label="Companies listed" />
-            <Divider />
-            <Stat
-              value={String(sectors.length || total)}
-              label={sectors.length ? "Sectors covered" : "Active records"}
-            />
-            <Divider />
-            <Stat value="Dehradun" label="Sahastradhara Road" />
-          </dl>
+          <form
+            method="get"
+            role="search"
+            className="mt-6 flex flex-col gap-2 rounded-xl border border-line bg-canvas p-1.5 sm:flex-row sm:items-center"
+          >
+            <div className="relative flex-1">
+              <SearchIcon className="pointer-events-none absolute left-3.5 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-muted" />
+              <input
+                name="q"
+                defaultValue={q ?? ""}
+                aria-label="Search directory by company or address"
+                placeholder="Search by company name, sector, or address…"
+                className="w-full rounded-lg border-0 bg-transparent py-2.5 pl-10 pr-3 text-[0.95rem] text-ink outline-none placeholder:text-muted"
+              />
+            </div>
+            {isFiltered && (
+              <a href="/directory" className="btn btn-ghost btn-sm">
+                Clear
+              </a>
+            )}
+            <button type="submit" className="btn btn-primary btn-sm sm:px-6">
+              <SearchIcon className="h-4 w-4" />
+              Search
+            </button>
+          </form>
         </div>
       </section>
 
-      <div className="mx-auto max-w-6xl px-5 pb-16">
-        {/* Floating search — overlaps the band for depth */}
-        <form
-          method="get"
-          role="search"
-          className="relative z-10 -mt-9 flex flex-col gap-2 rounded-2xl border border-line bg-white p-2.5 shadow-[0_24px_60px_-24px_rgba(11,37,64,0.45)] ring-1 ring-black/[0.02] sm:flex-row sm:items-center"
-        >
-          <div className="relative flex-1">
-            <SearchIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted" />
-            <input
-              name="q"
-              defaultValue={q ?? ""}
-              aria-label="Search directory by company or address"
-              placeholder="Search by company name, sector, or address…"
-              className="w-full rounded-lg border-0 bg-transparent py-3 pl-12 pr-3 text-[0.98rem] text-ink outline-none placeholder:text-muted"
-            />
+      <div className="mx-auto max-w-6xl px-5 py-10 lg:grid lg:grid-cols-[260px_1fr] lg:items-start lg:gap-10">
+        {/* ============== SIDEBAR: facets ============== */}
+        <aside className="lg:sticky lg:top-20 lg:self-start">
+          <div className="rounded-2xl border border-line bg-white p-4">
+            <p className="label-tag mb-3 text-muted">Browse by sector</p>
+            <nav className="flex flex-col gap-0.5">
+              <FacetLink
+                href="/directory"
+                label="All companies"
+                count={total}
+                active={!isFiltered}
+              />
+              {DIRECTORY_CATEGORIES.map((cat) => {
+                const count = categoryCounts.get(cat.dbCategory) ?? 0;
+                const active =
+                  !activeLetter && activeCategory?.dbCategory === cat.dbCategory;
+                return (
+                  <FacetLink
+                    key={cat.dbCategory}
+                    href={`/directory?q=${encodeURIComponent(cat.dbCategory)}`}
+                    label={cat.label}
+                    count={count}
+                    active={active}
+                    disabled={count === 0}
+                  />
+                );
+              })}
+            </nav>
           </div>
-          {isFiltered && (
-            <a href="/directory" className="btn btn-ghost">
-              Clear
-            </a>
-          )}
-          <button type="submit" className="btn btn-primary sm:px-7">
-            <SearchIcon className="h-4 w-4" />
-            Search
-          </button>
-        </form>
 
-        {/* Quick-filter sector chips */}
-        {sectors.length > 0 && (
-          <div className="mt-5 flex flex-wrap items-center gap-2">
-            <span className="label-tag mr-1 text-muted">Browse</span>
-            <a
-              href="/directory"
-              className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors duration-200 ${
-                !isFiltered
-                  ? "border-ink bg-ink text-white"
-                  : "border-line bg-white text-ink-700 hover:border-brand hover:text-brand"
-              }`}
-            >
-              All
-            </a>
-            {sectors.map((sector) => {
-              const active = !activeLetter && needle === sector.toLowerCase();
-              return (
-                <a
-                  key={sector}
-                  href={`/directory?q=${encodeURIComponent(sector)}`}
-                  className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors duration-200 ${
-                    active
-                      ? "border-brand bg-brand text-white"
-                      : "border-line bg-white text-ink-700 hover:border-brand hover:text-brand"
-                  }`}
-                >
-                  {sector}
-                </a>
-              );
-            })}
+          <div className="mt-4 rounded-2xl border border-line bg-white p-4">
+            <p className="label-tag mb-3 text-muted">Jump to letter</p>
+            <div className="grid grid-cols-7 gap-1 lg:grid-cols-6">
+              {ALPHABET.map((letterChar) => {
+                const has = availableLetters.has(letterChar);
+                const active = activeLetter === letterChar;
+                if (!has) {
+                  return (
+                    <span
+                      key={letterChar}
+                      className="grid h-8 place-items-center rounded-md text-xs font-semibold text-line"
+                    >
+                      {letterChar}
+                    </span>
+                  );
+                }
+                return (
+                  <a
+                    key={letterChar}
+                    href={`/directory?letter=${letterChar}`}
+                    className={`grid h-8 cursor-pointer place-items-center rounded-md text-xs font-semibold transition-colors duration-200 ${
+                      active
+                        ? "bg-brand text-white"
+                        : "text-ink-700 hover:bg-brand-50 hover:text-brand"
+                    }`}
+                  >
+                    {letterChar}
+                  </a>
+                );
+              })}
+            </div>
           </div>
-        )}
+        </aside>
 
-        {/* A–Z jump strip */}
-        <div className="mt-4 flex flex-wrap items-center gap-1.5">
-          <span className="label-tag mr-1 text-muted">Jump to</span>
-          {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letterChar) => {
-            const has = availableLetters.has(letterChar);
-            const active = activeLetter === letterChar;
-            if (!has) {
-              return (
-                <span
-                  key={letterChar}
-                  className="grid h-7 w-7 place-items-center rounded-md text-xs font-semibold text-line"
-                >
-                  {letterChar}
-                </span>
-              );
-            }
-            return (
-              <a
-                key={letterChar}
-                href={`/directory?letter=${letterChar}`}
-                className={`grid h-7 w-7 place-items-center rounded-md text-xs font-semibold transition-colors duration-200 ${
-                  active
-                    ? "bg-brand text-white"
-                    : "text-ink-700 hover:bg-brand-50 hover:text-brand"
-                }`}
-              >
-                {letterChar}
+        {/* ============== MAIN: results list ============== */}
+        <main className="mt-8 lg:mt-0">
+          <div className="flex items-center justify-between border-b-2 border-ink pb-3">
+            <p className="label-tag text-muted">
+              {isFiltered ? (
+                <>
+                  Showing <span className="text-ink">{filtered.length}</span> /{" "}
+                  {total}
+                </>
+              ) : (
+                <>
+                  Index · <span className="text-ink">{total}</span> records
+                </>
+              )}
+            </p>
+            <p className="label-tag text-muted">Sorted A–Z</p>
+          </div>
+
+          {filtered.length === 0 ? (
+            <div className="mt-6 flex flex-col items-center rounded-xl border border-dashed border-line bg-white px-5 py-16 text-center shadow-sm">
+              <span className="grid h-14 w-14 place-items-center rounded-full bg-brand-50 text-brand">
+                <SearchIcon className="h-6 w-6" />
+              </span>
+              <p className="mt-4 font-display text-lg font-semibold text-ink">
+                {needle
+                  ? `No companies match "${q}"`
+                  : `No companies start with "${activeLetter}"`}
+              </p>
+              <p className="mt-1 max-w-sm text-sm text-muted">
+                Try a shorter or different term — for example a company name
+                or locality.
+              </p>
+              <a href="/directory" className="btn btn-primary mt-5">
+                View all {total} companies
               </a>
-            );
-          })}
-        </div>
+            </div>
+          ) : (
+            <div className="mt-4 divide-y divide-line overflow-hidden rounded-2xl border border-line bg-white">
+              {filtered.map((c, i) => (
+                <DirectoryListRow key={c.id} company={c} index={i + 1} />
+              ))}
+            </div>
+          )}
 
-        {/* Registry header */}
-        <div className="mt-10 flex items-center justify-between border-b-2 border-ink pb-3">
-          <p className="label-tag text-muted">
-            {isFiltered ? (
-              <>
-                Showing <span className="text-ink">{filtered.length}</span> /{" "}
-                {total}
-              </>
-            ) : (
-              <>
-                Index · <span className="text-ink">{total}</span> records
-              </>
-            )}
+          <p className="mt-6 text-xs text-muted">
+            Listing data compiled from public business directories.
           </p>
-          <p className="label-tag hidden text-muted sm:block">Sorted A–Z</p>
-        </div>
-
-        {filtered.length === 0 ? (
-          <div className="mt-6 flex flex-col items-center rounded-xl border border-dashed border-line bg-white px-5 py-16 text-center shadow-sm">
-            <span className="grid h-14 w-14 place-items-center rounded-full bg-brand-50 text-brand">
-              <SearchIcon className="h-6 w-6" />
-            </span>
-            <p className="mt-4 font-display text-lg font-semibold text-ink">
-              {needle
-                ? `No companies match "${q}"`
-                : `No companies start with "${activeLetter}"`}
-            </p>
-            <p className="mt-1 max-w-sm text-sm text-muted">
-              Try a shorter or different term — for example a company name or
-              locality.
-            </p>
-            <a href="/directory" className="btn btn-primary mt-5">
-              View all {total} companies
-            </a>
-          </div>
-        ) : (
-          <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((c, i) => (
-              <DirectoryCard key={c.id} company={c} index={i + 1} />
-            ))}
-          </div>
-        )}
-
-        <p className="mt-8 text-xs text-muted">
-          Listing data compiled from public business directories.
-        </p>
+        </main>
       </div>
     </div>
   );
 }
 
-function Stat({ value, label }: { value: string; label: string }) {
-  return (
-    <div className="flex flex-col">
-      <dd className="font-display text-2xl font-bold leading-none text-white sm:text-3xl">
-        {value}
-      </dd>
-      <dt className="mt-1.5 text-xs font-medium uppercase tracking-wider text-slate-400">
+function FacetLink({
+  href,
+  label,
+  count,
+  active,
+  disabled,
+}: {
+  href: string;
+  label: string;
+  count: number;
+  active?: boolean;
+  disabled?: boolean;
+}) {
+  if (disabled) {
+    return (
+      <span className="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-line">
         {label}
-      </dt>
-    </div>
+        <span className="font-mono text-xs">0</span>
+      </span>
+    );
+  }
+  return (
+    <a
+      href={href}
+      className={`flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200 ${
+        active
+          ? "bg-brand text-white"
+          : "text-ink-700 hover:bg-brand-50 hover:text-brand"
+      }`}
+    >
+      <span className="truncate">{label}</span>
+      <span
+        className={`ml-2 shrink-0 font-mono text-xs ${active ? "text-white/80" : "text-muted"}`}
+      >
+        {count}
+      </span>
+    </a>
   );
 }
 
-function Divider() {
-  return <span className="hidden w-px self-stretch bg-white/10 sm:block" />;
+function initialsOf(name: string) {
+  const words = name.trim().split(/\s+/);
+  return ((words[0]?.[0] ?? "") + (words[1]?.[0] ?? "")).toUpperCase();
+}
+
+function DirectoryListRow({
+  company,
+  index,
+}: {
+  company: DirectoryCompany;
+  index: number;
+}) {
+  return (
+    <Link
+      href={`/directory/${company.slug}`}
+      className="group flex cursor-pointer items-center gap-3 px-4 py-3.5 transition-colors duration-200 hover:bg-brand-50/40 sm:gap-4 sm:px-5"
+    >
+      <span className="hidden w-7 shrink-0 font-mono text-xs text-line sm:block">
+        {String(index).padStart(2, "0")}
+      </span>
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-brand to-brand-700 text-[0.65rem] font-bold text-white ring-1 ring-inset ring-white/20">
+        {initialsOf(company.name)}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate font-display text-[0.95rem] font-semibold text-ink group-hover:text-brand">
+          {company.name}
+        </span>
+        {company.address && (
+          <span className="mt-0.5 flex items-center gap-1 truncate text-xs text-muted">
+            <PinIcon className="h-3 w-3 shrink-0 text-brand/60" />
+            <span className="truncate">{company.address}</span>
+          </span>
+        )}
+      </span>
+      {company.category && (
+        <span className="hidden shrink-0 rounded-full bg-brand-50 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wider text-brand-700 sm:inline-flex">
+          {company.category}
+        </span>
+      )}
+      <span className="shrink-0 text-line transition-colors duration-200 group-hover:text-brand">
+        <ArrowIcon className="h-4 w-4" />
+      </span>
+    </Link>
+  );
 }
 
 function SearchIcon({ className }: { className?: string }) {
@@ -268,6 +306,34 @@ function SearchIcon({ className }: { className?: string }) {
         stroke="currentColor"
         strokeWidth="1.8"
         strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function PinIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path
+        d="M12 21s-6.5-5.6-6.5-11A6.5 6.5 0 1118.5 10c0 5.4-6.5 11-6.5 11z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinejoin="round"
+      />
+      <circle cx="12" cy="10" r="2.2" stroke="currentColor" strokeWidth="1.7" />
+    </svg>
+  );
+}
+
+function ArrowIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path
+        d="M5 12h14M13 6l6 6-6 6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );

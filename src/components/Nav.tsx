@@ -1,17 +1,24 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getSession } from "@/lib/auth";
 import { logoutAction } from "@/lib/actions/auth-actions";
+import MobileNavMenu from "@/components/MobileNavMenu";
 
 export default async function Nav() {
   const session = await getSession();
 
   return (
-    <header className="sticky top-0 z-40 border-b-2 border-ink bg-white/90 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b-2 border-ink bg-white/90 backdrop-blur-md relative">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
         <Link href="/" className="flex items-center gap-2.5">
-          <span className="grid h-9 w-9 place-items-center border-2 border-ink bg-accent font-display text-base font-bold text-white">
-            S
-          </span>
+          <Image
+            src="/sidcul-logo.jpeg"
+            alt="SIDCUL Industrial Association logo"
+            width={479}
+            height={640}
+            className="h-10 w-auto shrink-0 object-contain"
+            priority
+          />
           <span className="font-display text-lg font-bold tracking-tight text-ink">
             SIDCUL <span className="text-accent">Directory</span>
           </span>
@@ -57,7 +64,7 @@ export default async function Nav() {
           )}
 
           {session ? (
-            <div className="flex items-center gap-2 pl-2">
+            <div className="hidden items-center gap-2 pl-2 sm:flex">
               <span className="hidden text-xs text-muted sm:inline">
                 {session.name}
               </span>
@@ -68,7 +75,7 @@ export default async function Nav() {
               </form>
             </div>
           ) : (
-            <div className="flex items-center gap-2 pl-1">
+            <div className="hidden items-center gap-2 pl-1 sm:flex">
               <Link href="/login" className="btn btn-ghost btn-sm">
                 Log in
               </Link>
@@ -77,6 +84,8 @@ export default async function Nav() {
               </Link>
             </div>
           )}
+
+          <MobileNavMenu session={session} logoutAction={logoutAction} />
         </nav>
       </div>
     </header>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import RegisterForm from "@/components/forms/RegisterForm";
@@ -19,11 +20,15 @@ export default async function RegisterPage() {
           }}
         />
         <Link href="/" className="relative flex items-center gap-2.5">
-          <span className="grid h-9 w-9 place-items-center border-2 border-white/40 bg-accent font-display text-base font-bold text-white">
-            S
-          </span>
+          <Image
+            src="/sidcul-logo.jpeg"
+            alt="SIDCUL Industrial Association logo"
+            width={479}
+            height={640}
+            className="h-10 w-auto shrink-0 object-contain"
+          />
           <span className="font-display text-lg font-bold text-white">
-            SIDCUL <span className="text-accent">Careers</span>
+            SIDCUL <span className="text-accent">Directory</span>
           </span>
         </Link>
 

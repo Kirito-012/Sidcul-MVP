@@ -129,16 +129,14 @@ async function main() {
       name,
       category: card.category,
       address: card.address || null,
-      area: inPark
-        ? "SIDCUL IT Park, Sahastradhara Road, Dehradun"
-        : "Dehradun, Uttarakhand",
+      area: inPark ? "SIDCUL IT Park, Sahastradhara Road" : "Uttarakhand",
       pincode: card.pincode,
       phone: null,
       website: null,
       email: null,
       description: `${name} is a technology company${
         card.category ? ` (${card.category})` : ""
-      } listed in the SIDCUL IT directory, Dehradun.`,
+      } listed in the SIDCUL IT directory.`,
     };
     try {
       await prisma.directoryCompany.upsert({

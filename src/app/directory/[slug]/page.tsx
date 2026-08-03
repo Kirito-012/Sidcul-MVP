@@ -67,7 +67,7 @@ export default async function DirectoryCompanyPage({
               </h1>
               <p className="mt-2 flex items-center gap-1.5 text-sm font-medium text-slate-300">
                 <PinIcon className="h-4 w-4 shrink-0" />
-                {company.area ?? "SIDCUL IT Park, Dehradun"}
+                {company.area ?? "SIDCUL Industrial Estate, Haridwar"}
               </p>
             </div>
           </div>

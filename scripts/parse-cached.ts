@@ -58,14 +58,12 @@ async function main() {
         name: c.name,
         category: label,
         address: c.address || null,
-        area: inPark
-          ? "SIDCUL IT Park, Sahastradhara Road, Dehradun"
-          : "Dehradun, Uttarakhand",
+        area: inPark ? "SIDCUL IT Park, Sahastradhara Road" : "Uttarakhand",
         pincode: c.pincode,
         phone: null,
         email: null,
         website: null,
-        description: `${c.name} is a technology company (${label}) listed in the SIDCUL IT directory, Dehradun.`,
+        description: `${c.name} is a technology company (${label}) listed in the SIDCUL IT directory.`,
       };
       try {
         await prisma.directoryCompany.upsert({

@@ -51,7 +51,7 @@ export default async function Home() {
           }}
         />
 
-        <CornerFrame className="mx-auto max-w-3xl px-5 py-14 text-center sm:py-20">
+        <CornerFrame className="mx-auto max-w-3xl px-6 py-16 text-center sm:px-5 sm:py-20">
           <p className="label-tag mx-auto inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-accent">
             <span className="relative grid h-2 w-2 place-items-center">
               <span className="spm-live absolute inset-0 rounded-full bg-accent" />
@@ -60,7 +60,7 @@ export default async function Home() {
             Estate Reg. No. UK-SIDCUL-HW
           </p>
 
-          <h1 className="mx-auto mt-5 max-w-2xl font-display text-3xl font-bold leading-[1.1] sm:text-5xl">
+          <h1 className="mx-auto mt-6 max-w-2xl font-display text-[1.7rem] font-bold leading-[1.2] sm:mt-5 sm:text-5xl sm:leading-[1.1]">
             Find companies in the SIDCUL{" "}
             <span className="bg-gradient-to-r from-accent to-emerald-300 bg-clip-text text-transparent">
               Haridwar
@@ -68,7 +68,7 @@ export default async function Home() {
             estate
           </h1>
 
-          <p className="mx-auto mt-4 max-w-xl text-[1.05rem] leading-relaxed text-slate-300">
+          <p className="mx-auto mt-5 max-w-xl text-[0.95rem] leading-relaxed text-slate-300 sm:mt-4 sm:text-[1.05rem]">
             Search manufacturers, pharma majors and IT firms across the
             estate — who they are, where they&apos;re based, and what they
             do.
@@ -79,7 +79,7 @@ export default async function Home() {
             method="get"
             action="/directory"
             role="search"
-            className="mx-auto mt-7 flex max-w-xl flex-col gap-2 rounded-2xl border border-white/15 bg-white/[0.06] p-2 backdrop-blur-sm sm:flex-row sm:items-center"
+            className="mx-auto mt-8 flex max-w-xl flex-col gap-2 rounded-2xl border border-white/15 bg-white/[0.06] p-2 backdrop-blur-sm sm:mt-7 sm:flex-row sm:items-center"
           >
             <div className="relative flex-1">
               <SearchIcon className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
@@ -96,8 +96,8 @@ export default async function Home() {
             </button>
           </form>
 
-          {/* Popular search shortcuts */}
-          <div className="mx-auto mt-4 flex max-w-xl flex-wrap items-center justify-center gap-2">
+          {/* Popular search shortcuts — desktop only; kept off mobile to reduce clutter */}
+          <div className="mx-auto mt-4 hidden max-w-xl flex-wrap items-center justify-center gap-2 sm:flex">
             <span className="label-tag text-slate-400">Popular</span>
             {POPULAR_SEARCHES.map((p) => (
               <Link
@@ -110,22 +110,33 @@ export default async function Home() {
             ))}
           </div>
 
-          <p className="label-tag mt-6 text-slate-400">
-            {`${directoryTotal} companies · ${distinctCategoryCount} sectors · Haridwar & Dehradun`}
+          {/* Coverage line — desktop only; the sector grid below already covers this on mobile */}
+          <p className="label-tag mt-6 !hidden text-slate-400 sm:!inline-flex">
+            {`${directoryTotal} companies · ${distinctCategoryCount} sectors · SIDCUL, Haridwar`}
           </p>
 
-          <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-            <Link href="/directory" className="btn btn-primary">
+          <div className="mt-10 flex flex-col items-center gap-4 sm:mt-7 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-3">
+            <Link href="/directory" className="btn btn-primary w-full sm:w-auto">
               Browse the directory
               <ArrowIcon />
             </Link>
             {!session && (
-              <Link
-                href="/register"
-                className="btn btn-outline border-white/20 bg-transparent text-white hover:border-white/40 hover:bg-white/10 hover:text-white"
-              >
-                List your company
-              </Link>
+              <>
+                {/* Mobile: lightweight text link to reduce visual weight */}
+                <Link
+                  href="/register"
+                  className="text-sm font-medium text-slate-300 underline underline-offset-4 transition-colors hover:text-white sm:hidden"
+                >
+                  List your company
+                </Link>
+                {/* Desktop: full outline button */}
+                <Link
+                  href="/register"
+                  className="btn btn-outline !hidden border-white/20 bg-transparent text-white hover:border-white/40 hover:bg-white/10 hover:text-white sm:!inline-flex"
+                >
+                  List your company
+                </Link>
+              </>
             )}
           </div>
         </CornerFrame>
