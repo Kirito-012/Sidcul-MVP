@@ -4,6 +4,12 @@ import type { DirectoryCompany } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { DIRECTORY_CATEGORIES } from "@/lib/constants";
+import {
+  ESTATE_SECTOR_DEFS,
+  OTHER_SECTOR_ID,
+  groupCompaniesByEstateSector,
+} from "@/lib/estate-sectors";
+import EstateMap from "@/components/EstateMap";
 
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
@@ -17,7 +23,7 @@ const POPULAR_SEARCHES = [
 export default async function Home() {
   const session = await getSession();
 
-  const [directoryTotal, categoryGroups, companies, allNames, openJobs] =
+  const [directoryTotal, categoryGroups, companies, allForMap, openJobs] =
     await Promise.all([
       prisma.directoryCompany.count(),
       prisma.directoryCompany.groupBy({
@@ -25,7 +31,9 @@ export default async function Home() {
         _count: { _all: true },
       }),
       prisma.directoryCompany.findMany({ orderBy: { name: "asc" }, take: 18 }),
-      prisma.directoryCompany.findMany({ select: { name: true } }),
+      prisma.directoryCompany.findMany({
+        select: { name: true, slug: true, address: true, category: true },
+      }),
       prisma.job.count({ where: { status: "OPEN" } }),
     ]);
 
@@ -34,8 +42,15 @@ export default async function Home() {
   );
   const distinctCategoryCount = categoryGroups.filter((g) => g.category).length;
   const availableLetters = new Set(
-    allNames.map((n) => n.name.trim().charAt(0).toUpperCase()),
+    allForMap.map((n) => n.name.trim().charAt(0).toUpperCase()),
   );
+
+  const sectorGroups = groupCompaniesByEstateSector(allForMap);
+  const estateSectors = ESTATE_SECTOR_DEFS.map((def) => ({
+    ...def,
+    companies: sectorGroups.get(def.id) ?? [],
+  }));
+  const otherCompanies = sectorGroups.get(OTHER_SECTOR_ID) ?? [];
 
   return (
     <div>
@@ -148,6 +163,25 @@ export default async function Home() {
           <div className="flex w-max">
             <Marquee />
             <Marquee />
+          </div>
+        </div>
+      </section>
+
+      {/* ============== ESTATE MAP ============== */}
+      <section className="border-t border-line bg-canvas">
+        <div className="mx-auto max-w-6xl px-5 py-14 sm:py-16">
+          <SectionHead
+            eyebrow="Explore the estate"
+            title="Find companies by location"
+            right="Interactive map"
+          />
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted">
+            Click a sector to see which registered companies are based
+            there.
+          </p>
+
+          <div className="mt-6">
+            <EstateMap sectors={estateSectors} otherCompanies={otherCompanies} />
           </div>
         </div>
       </section>
@@ -459,7 +493,7 @@ function Marquee() {
     "Auto Components",
     "FMCG",
     "Plastic Mould",
-    "Printing & Packaging",
+    "Fire & Safety",
   ];
   return (
     <div className="spm-marquee-track flex shrink-0 items-center gap-8 px-4">

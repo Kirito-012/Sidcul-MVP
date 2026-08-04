@@ -32,7 +32,7 @@ export const DIRECTORY_CATEGORIES = [
   },
   { label: "FMCG", dbCategory: "FMCG" },
   { label: "Plastic Mould Manufacturer", dbCategory: "Plastic Mould Manufacturer" },
-  { label: "Printing & Packaging", dbCategory: "Printing & Packaging" },
+  { label: "Fire & Safety", dbCategory: "Fire & Safety" },
 ] as const;
 
 /** Job types skewed toward industrial/manufacturing hiring. */
