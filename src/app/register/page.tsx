@@ -28,7 +28,7 @@ export default async function RegisterPage() {
             className="h-10 w-auto shrink-0 object-contain"
           />
           <span className="font-display text-lg font-bold text-white">
-            SIDCUL <span className="text-accent">Directory</span>
+            SIDCUL <span className="text-accent">Hub</span>
           </span>
         </Link>
 

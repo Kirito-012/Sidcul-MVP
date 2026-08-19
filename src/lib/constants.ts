@@ -24,15 +24,23 @@ export type Sector = (typeof SECTORS)[number];
 export const DIRECTORY_CATEGORIES = [
   { label: "Pharmaceuticals", dbCategory: "Pharmaceuticals" },
   { label: "IT & Software", dbCategory: "Software Companies" },
-  { label: "Electricals", dbCategory: "Electricals" },
-  { label: "Automobiles Manufacturer", dbCategory: "Automobiles Manufacturer" },
+  { label: "Automobiles & Auto Components", dbCategory: "Automobile & Auto Component" },
   {
-    label: "Automobiles Component Manufacturer",
-    dbCategory: "Automobiles Component Manufacturer",
+    label: "Electricals & Power",
+    dbCategory: "Electrical & Electric Component,Power",
   },
-  { label: "FMCG", dbCategory: "FMCG" },
-  { label: "Plastic Mould Manufacturer", dbCategory: "Plastic Mould Manufacturer" },
-  { label: "Fire & Safety", dbCategory: "Fire & Safety" },
+  {
+    label: "Pharma, Cosmetic & Ayush",
+    dbCategory: "Pharma Cosmetic & Ayush/HEALTHCARE",
+  },
+  { label: "Paper & Packaging", dbCategory: "Paper & Paper Packaging" },
+  {
+    label: "Building Materials & Chemicals",
+    dbCategory: "Building Materials & Others Chemicals",
+  },
+  { label: "Service Providers", dbCategory: "Service Provider" },
+  { label: "Food Processing", dbCategory: "Food Processing" },
+  { label: "Plastic & Plastic Packaging", dbCategory: "Plastic & Plastic Packaging" },
 ] as const;
 
 /** Job types skewed toward industrial/manufacturing hiring. */
@@ -62,4 +70,30 @@ export type ApplicationStatus = (typeof APPLICATION_STATUSES)[number]["value"];
 
 export const APPLICATION_STATUS_LABELS: Record<string, string> = Object.fromEntries(
   APPLICATION_STATUSES.map((s) => [s.value, s.label]),
+);
+
+/** Equipment categories for leasing listings. */
+export const EQUIPMENT_CATEGORIES = [
+  "Heavy Machinery",
+  "Material Handling",
+  "Packaging & Filling",
+  "Testing & QC Instruments",
+  "Power & Utility",
+  "Tools & Fabrication",
+] as const;
+
+export type EquipmentCategory = (typeof EQUIPMENT_CATEGORIES)[number];
+
+/** Lifecycle of a lease request (managed booking flow). */
+export const LEASE_STATUSES = [
+  { value: "PENDING", label: "Pending" },
+  { value: "ACCEPTED", label: "Accepted" },
+  { value: "REJECTED", label: "Rejected" },
+  { value: "CANCELLED", label: "Cancelled" },
+] as const;
+
+export type LeaseStatus = (typeof LEASE_STATUSES)[number]["value"];
+
+export const LEASE_STATUS_LABELS: Record<string, string> = Object.fromEntries(
+  LEASE_STATUSES.map((s) => [s.value, s.label]),
 );

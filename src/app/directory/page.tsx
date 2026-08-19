@@ -6,7 +6,7 @@ import { DIRECTORY_CATEGORIES } from "@/lib/constants";
 const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
 export const metadata = {
-  title: "SIDCUL Business Directory — Companies in the Haridwar Estate",
+  title: "Business Directory — SIDCUL Hub",
 };
 
 export default async function DirectoryPage({

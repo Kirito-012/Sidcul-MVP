@@ -1,4 +1,4 @@
-# SIDCUL Careers — Hyper-Local Industrial Job Portal (MVP)
+# SIDCUL Hub — Directory, Jobs & Equipment Leasing Platform (MVP)
 
 A job portal for the **SIDCUL Manufacturers Association** (IIE Haridwar industrial
 estate). Verified manufacturers post jobs; local talent (students / ITI / diploma

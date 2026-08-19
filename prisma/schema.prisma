@@ -39,6 +39,8 @@ model CompanyProfile {
   createdAt   DateTime @default(now())
 
   jobs Job[]
+  equipment     Equipment[]    @relation("EquipmentOwner")
+  leaseRequests LeaseRequest[] @relation("LeaseRequester")
 }
 
 /// Extra data for STUDENT accounts.
@@ -96,6 +98,36 @@ model Resume {
   mimeType      String
   size          Int
   createdAt     DateTime    @default(now())
+}
+
+/// A piece of machinery/equipment a (verified) company lists for lease.
+model Equipment {
+  id          String         @id @default(auto()) @map("_id") @db.ObjectId
+  companyId   String         @db.ObjectId
+  company     CompanyProfile @relation("EquipmentOwner", fields: [companyId], references: [id], onDelete: Cascade)
+  name        String
+  description String
+  category    String? // one of EQUIPMENT_CATEGORIES
+  location    String
+  rate        String? // free-text, e.g. "₹5,000/day" — no payment processing
+  status      String         @default("LISTED") // LISTED | UNLISTED
+  createdAt   DateTime       @default(now())
+
+  leaseRequests LeaseRequest[]
+}
+
+/// A managed booking request from one verified company to lease another's equipment.
+model LeaseRequest {
+  id          String         @id @default(auto()) @map("_id") @db.ObjectId
+  equipmentId String         @db.ObjectId
+  equipment   Equipment      @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  requesterId String         @db.ObjectId
+  requester   CompanyProfile @relation("LeaseRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  startDate   DateTime
+  endDate     DateTime
+  message     String?
+  status      String         @default("PENDING") // PENDING | ACCEPTED | REJECTED | CANCELLED
+  createdAt   DateTime       @default(now())
 }
 
 /// A read-only directory listing scraped from a public business directory.

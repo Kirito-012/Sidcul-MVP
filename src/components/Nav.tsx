@@ -20,31 +20,55 @@ export default async function Nav() {
             priority
           />
           <span className="font-display text-lg font-bold tracking-tight text-ink">
-            SIDCUL <span className="text-accent">Directory</span>
+            SIDCUL <span className="text-accent">Hub</span>
           </span>
         </Link>
 
         <nav className="flex items-center gap-1 text-sm font-medium sm:gap-2">
+          {session?.role !== "COMPANY" && (
+            <>
+              <Link
+                href="/jobs"
+                className="hidden rounded-lg px-3 py-2 text-ink-700 transition-colors hover:bg-brand-50 hover:text-brand sm:inline-block"
+              >
+                Browse Jobs
+              </Link>
+              <Link
+                href="/directory"
+                className="hidden rounded-lg px-3 py-2 text-ink-700 transition-colors hover:bg-brand-50 hover:text-brand sm:inline-block"
+              >
+                IT Directory
+              </Link>
+            </>
+          )}
           <Link
-            href="/jobs"
+            href="/equipment"
             className="hidden rounded-lg px-3 py-2 text-ink-700 transition-colors hover:bg-brand-50 hover:text-brand sm:inline-block"
           >
-            Browse Jobs
-          </Link>
-          <Link
-            href="/directory"
-            className="hidden rounded-lg px-3 py-2 text-ink-700 transition-colors hover:bg-brand-50 hover:text-brand sm:inline-block"
-          >
-            IT Directory
+            Lease Equipment
           </Link>
 
           {session?.role === "COMPANY" && (
-            <Link
-              href="/company"
-              className="hidden rounded-lg px-3 py-2 text-ink-700 transition-colors hover:bg-brand-50 hover:text-brand sm:inline-block"
-            >
-              Dashboard
-            </Link>
+            <>
+              <Link
+                href="/company"
+                className="hidden rounded-lg px-3 py-2 text-ink-700 transition-colors hover:bg-brand-50 hover:text-brand sm:inline-block"
+              >
+                Dashboard
+              </Link>
+              <Link
+                href="/company/equipment"
+                className="hidden rounded-lg px-3 py-2 text-ink-700 transition-colors hover:bg-brand-50 hover:text-brand sm:inline-block"
+              >
+                My Equipment
+              </Link>
+              <Link
+                href="/company/leases"
+                className="hidden rounded-lg px-3 py-2 text-ink-700 transition-colors hover:bg-brand-50 hover:text-brand sm:inline-block"
+              >
+                My Lease Requests
+              </Link>
+            </>
           )}
           {session?.role === "STUDENT" && (
             <Link

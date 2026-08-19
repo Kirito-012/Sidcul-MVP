@@ -87,29 +87,56 @@ export default function MobileNavMenu({
           }}
         >
           <nav className="flex flex-col gap-1 px-5 py-4 text-sm font-medium">
+            {session?.role !== "COMPANY" && (
+              <>
+                <Link
+                  href="/jobs"
+                  onClick={closeMenu}
+                  className="rounded-lg px-3 py-2.5 text-ink-700 transition-colors duration-200 hover:bg-brand-50 hover:text-brand"
+                >
+                  Browse Jobs
+                </Link>
+                <Link
+                  href="/directory"
+                  onClick={closeMenu}
+                  className="rounded-lg px-3 py-2.5 text-ink-700 transition-colors duration-200 hover:bg-brand-50 hover:text-brand"
+                >
+                  IT Directory
+                </Link>
+              </>
+            )}
             <Link
-              href="/jobs"
+              href="/equipment"
               onClick={closeMenu}
               className="rounded-lg px-3 py-2.5 text-ink-700 transition-colors duration-200 hover:bg-brand-50 hover:text-brand"
             >
-              Browse Jobs
-            </Link>
-            <Link
-              href="/directory"
-              onClick={closeMenu}
-              className="rounded-lg px-3 py-2.5 text-ink-700 transition-colors duration-200 hover:bg-brand-50 hover:text-brand"
-            >
-              IT Directory
+              Lease Equipment
             </Link>
 
             {session?.role === "COMPANY" && (
-              <Link
-                href="/company"
-                onClick={closeMenu}
-                className="rounded-lg px-3 py-2.5 text-ink-700 transition-colors duration-200 hover:bg-brand-50 hover:text-brand"
-              >
-                Dashboard
-              </Link>
+              <>
+                <Link
+                  href="/company"
+                  onClick={closeMenu}
+                  className="rounded-lg px-3 py-2.5 text-ink-700 transition-colors duration-200 hover:bg-brand-50 hover:text-brand"
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  href="/company/equipment"
+                  onClick={closeMenu}
+                  className="rounded-lg px-3 py-2.5 text-ink-700 transition-colors duration-200 hover:bg-brand-50 hover:text-brand"
+                >
+                  My Equipment
+                </Link>
+                <Link
+                  href="/company/leases"
+                  onClick={closeMenu}
+                  className="rounded-lg px-3 py-2.5 text-ink-700 transition-colors duration-200 hover:bg-brand-50 hover:text-brand"
+                >
+                  My Lease Requests
+                </Link>
+              </>
             )}
             {session?.role === "STUDENT" && (
               <Link
