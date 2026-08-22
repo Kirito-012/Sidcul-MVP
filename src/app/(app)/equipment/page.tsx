@@ -1,6 +1,8 @@
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import EquipmentCard from "@/components/EquipmentCard";
 import { EQUIPMENT_CATEGORIES } from "@/lib/constants";
+import { getSession } from "@/lib/auth";
 
 type Search = { q?: string; category?: string };
 
@@ -9,6 +11,9 @@ export default async function EquipmentPage({
 }: {
   searchParams: Promise<Search>;
 }) {
+  const session = await getSession();
+  if (session?.role === "STUDENT") redirect("/");
+
   const { q, category } = await searchParams;
 
   // Only show listed equipment from verified companies.

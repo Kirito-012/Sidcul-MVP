@@ -10,28 +10,13 @@ type NavItem = {
   match: (pathname: string) => boolean;
 };
 
-const MANAGE_ITEMS: NavItem[] = [
+const NAV_ITEMS: NavItem[] = [
   {
-    href: "/company",
-    label: "Dashboard",
-    icon: BriefcaseIcon,
-    match: (p) => p === "/company" || p.startsWith("/company/jobs"),
+    href: "/student",
+    label: "My Applications",
+    icon: ClipboardIcon,
+    match: (p) => p === "/student",
   },
-  {
-    href: "/company/equipment",
-    label: "Equipment",
-    icon: ToolIcon,
-    match: (p) => p.startsWith("/company/equipment"),
-  },
-  {
-    href: "/company/leases",
-    label: "Lease Requests",
-    icon: ArrowsIcon,
-    match: (p) => p.startsWith("/company/leases"),
-  },
-];
-
-const MARKETPLACE_ITEMS: NavItem[] = [
   {
     href: "/jobs",
     label: "Browse Jobs",
@@ -41,27 +26,17 @@ const MARKETPLACE_ITEMS: NavItem[] = [
   {
     href: "/directory",
     label: "IT Directory",
-    icon: BookIcon,
-    match: (p) => p === "/directory" || p.startsWith("/directory/"),
-  },
-  {
-    href: "/equipment",
-    label: "Browse Equipment",
     icon: SearchIcon,
-    match: (p) => p === "/equipment" || p.startsWith("/equipment/"),
+    match: (p) => p === "/directory" || p.startsWith("/directory/"),
   },
 ];
 
-const ALL_ITEMS = [...MANAGE_ITEMS, ...MARKETPLACE_ITEMS];
-
-export default function CompanySidebar({
-  companyName,
-  verified,
+export default function StudentSidebar({
+  name,
   logoutAction,
   children,
 }: {
-  companyName: string;
-  verified: boolean;
+  name: string;
   logoutAction: () => Promise<void>;
   children: React.ReactNode;
 }) {
@@ -71,12 +46,7 @@ export default function CompanySidebar({
     <div className="flex w-full">
       {/* ============== DESKTOP SIDEBAR ============== */}
       <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-ink lg:flex">
-        <SidebarContent
-          pathname={pathname}
-          companyName={companyName}
-          verified={verified}
-          logoutAction={logoutAction}
-        />
+        <SidebarContent pathname={pathname} name={name} logoutAction={logoutAction} />
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
@@ -96,7 +66,7 @@ export default function CompanySidebar({
             </form>
           </div>
           <div className="flex gap-1.5 overflow-x-auto border-b-2 border-ink px-3 py-2.5">
-            {ALL_ITEMS.map((item) => {
+            {NAV_ITEMS.map((item) => {
               const active = item.match(pathname);
               const Icon = item.icon;
               return (
@@ -125,52 +95,27 @@ export default function CompanySidebar({
 
 function SidebarContent({
   pathname,
-  companyName,
-  verified,
+  name,
   logoutAction,
 }: {
   pathname: string;
-  companyName: string;
-  verified: boolean;
+  name: string;
   logoutAction: () => Promise<void>;
 }) {
   return (
     <div className="flex h-full flex-col">
-      {/* Company identity */}
+      {/* Student identity */}
       <div className="mx-4 mt-4 rounded-xl bg-white/5 p-3.5">
-        <p className="truncate text-sm font-semibold text-white">{companyName}</p>
-        <span
-          className={`badge mt-1.5 ${
-            verified
-              ? "bg-accent-50 text-accent-600"
-              : "bg-amber-100 text-amber-800"
-          }`}
-        >
-          {verified ? (
-            <>
-              <CheckIcon className="h-3 w-3" />
-              Verified
-            </>
-          ) : (
-            "Pending verification"
-          )}
-        </span>
+        <p className="truncate text-sm font-semibold text-white">{name}</p>
+        <span className="badge mt-1.5 bg-accent-50 text-accent-600">Student</span>
       </div>
 
       {/* Nav */}
       <nav className="mt-6 flex-1 space-y-6 overflow-y-auto px-3">
         <div>
-          <p className="label-tag px-2.5 text-slate-400">Manage</p>
+          <p className="label-tag px-2.5 text-slate-400">Menu</p>
           <div className="mt-2 space-y-0.5">
-            {MANAGE_ITEMS.map((item) => (
-              <SidebarLink key={item.href} item={item} active={item.match(pathname)} />
-            ))}
-          </div>
-        </div>
-        <div>
-          <p className="label-tag px-2.5 text-slate-400">Marketplace</p>
-          <div className="mt-2 space-y-0.5">
-            {MARKETPLACE_ITEMS.map((item) => (
+            {NAV_ITEMS.map((item) => (
               <SidebarLink key={item.href} item={item} active={item.match(pathname)} />
             ))}
           </div>
@@ -217,6 +162,16 @@ function SidebarLink({ item, active }: { item: NavItem; active: boolean }) {
   );
 }
 
+function ClipboardIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <rect x="5" y="4.5" width="14" height="16" rx="2" stroke="currentColor" strokeWidth="1.7" />
+      <path d="M9 4V3a1 1 0 011-1h4a1 1 0 011 1v1" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      <path d="M8.5 11h7M8.5 15h7" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function BriefcaseIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
@@ -227,67 +182,11 @@ function BriefcaseIcon({ className }: { className?: string }) {
   );
 }
 
-function ToolIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path
-        d="M14.7 6.3a4 4 0 015.6 5.6l-7 7a4 4 0 01-5.6-5.6l1.6-1.6M9.5 14.5l-5 5"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function ArrowsIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path
-        d="M4 8h13m0 0l-3.5-3.5M17 8l-3.5 3.5M20 16H7m0 0l3.5-3.5M7 16l3.5 3.5"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function BookIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path
-        d="M4 5.5a2 2 0 012-2h13v14.5H6a2 2 0 00-2 2z"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinejoin="round"
-      />
-      <path d="M4 18v.5a2 2 0 002 2h13" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
 function SearchIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
       <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.8" />
       <path d="M20 20l-3.2-3.2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function CheckIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path
-        d="M5 12.5l4.5 4.5L19 7"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
     </svg>
   );
 }

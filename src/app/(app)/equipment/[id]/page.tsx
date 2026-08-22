@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import LeaseRequestForm from "@/components/forms/LeaseRequestForm";
@@ -11,6 +11,9 @@ export default async function EquipmentDetailPage({
 }) {
   const { id } = await params;
 
+  const session = await getSession();
+  if (session?.role === "STUDENT") redirect("/");
+
   const equipment = await prisma.equipment.findUnique({
     where: { id },
     include: { company: true },
@@ -18,8 +21,6 @@ export default async function EquipmentDetailPage({
 
   // Hide listings from unverified companies entirely.
   if (!equipment || !equipment.company.verified) notFound();
-
-  const session = await getSession();
 
   let ownCompanyId: string | null = null;
   if (session?.role === "COMPANY") {
