@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
+import LockedField from "@/components/LockedField";
 
 function initialsOf(name: string) {
   const words = name.trim().split(/\s+/);
@@ -14,8 +16,13 @@ export default async function DirectoryCompanyPage({
 }) {
   const { slug } = await params;
 
-  const company = await prisma.directoryCompany.findUnique({ where: { slug } });
+  const [company, session] = await Promise.all([
+    prisma.directoryCompany.findUnique({ where: { slug } }),
+    getSession(),
+  ]);
   if (!company) notFound();
+
+  const unlocked = session !== null;
 
   const website = company.website
     ? company.website.startsWith("http")
@@ -80,7 +87,7 @@ export default async function DirectoryCompanyPage({
             <div className="border-b border-line p-6 sm:p-7">
               <p className="label-tag mb-2.5 text-muted">About</p>
               <p className="leading-relaxed text-ink-700">
-                {company.description}
+                <LockedField unlocked={unlocked}>{company.description}</LockedField>
               </p>
             </div>
           )}
@@ -91,12 +98,14 @@ export default async function DirectoryCompanyPage({
             {company.pincode && <Field label="Pincode">{company.pincode}</Field>}
             {company.phone && (
               <Field label="Phone">
-                <a
-                  href={`tel:${company.phone}`}
-                  className="text-brand hover:underline"
-                >
-                  {company.phone}
-                </a>
+                <LockedField unlocked={unlocked}>
+                  <a
+                    href={`tel:${company.phone}`}
+                    className="text-brand hover:underline"
+                  >
+                    {company.phone}
+                  </a>
+                </LockedField>
               </Field>
             )}
             {company.email && (
@@ -132,9 +141,12 @@ export default async function DirectoryCompanyPage({
               </p>
               <div className="flex gap-2">
                 {company.phone && (
-                  <a href={`tel:${company.phone}`} className="btn btn-outline btn-sm">
+                  <a
+                    href={unlocked ? `tel:${company.phone}` : "/login"}
+                    className="btn btn-outline btn-sm"
+                  >
                     <PhoneIcon className="h-4 w-4" />
-                    Call
+                    {unlocked ? "Call" : "Sign in to call"}
                   </a>
                 )}
                 {website && (
