@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { getSession } from "@/lib/auth";
 import { logoutAction } from "@/lib/actions/auth-actions";
 import MobileNavMenu from "@/components/MobileNavMenu";
@@ -8,19 +7,15 @@ export default async function Nav() {
   const session = await getSession();
 
   return (
-    <header className="sticky top-0 z-40 border-b-2 border-ink bg-white/90 backdrop-blur-md relative">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
-        <Link href="/" className="flex items-center gap-2.5">
-          <Image
-            src="/sidcul-logo.jpeg"
-            alt="SIDCUL Industrial Association logo"
-            width={479}
-            height={640}
-            className="h-10 w-auto shrink-0 object-contain"
-            priority
-          />
-          <span className="font-display text-lg font-bold tracking-tight text-ink">
-            SIDCUL <span className="text-accent">Hub</span>
+    <header className="sticky top-0 z-40 border-b border-line bg-canvas/80 backdrop-blur-md">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3.5">
+        <Link href="/" className="group flex items-baseline gap-2">
+          <span className="font-display text-[1.15rem] font-bold tracking-tight text-ink">
+            SIDCUL<span className="text-brand"> Hub</span>
+          </span>
+          <span className="hidden h-3 w-px bg-line sm:block" />
+          <span className="label-tag hidden text-[0.6rem] text-muted sm:inline">
+            Haridwar
           </span>
         </Link>
 

@@ -10,30 +10,35 @@ export default async function RegisterPage() {
 
   return (
     <div className="grid min-h-[calc(100vh-65px)] lg:grid-cols-2">
-      <div className="relative hidden overflow-hidden bg-ink lg:flex lg:flex-col lg:justify-between lg:p-12">
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.07]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.6) 1px, transparent 1px)",
-            backgroundSize: "40px 40px",
-          }}
-        />
-        <Link href="/" className="relative flex items-center gap-2.5">
+      <div className="relative hidden overflow-hidden bg-ink-950 lg:flex lg:flex-col lg:justify-between lg:p-12">
+        <div className="pointer-events-none absolute inset-0">
           <Image
-            src="/sidcul-logo.jpeg"
-            alt="SIDCUL Industrial Association logo"
-            width={479}
-            height={640}
-            className="h-10 w-auto shrink-0 object-contain"
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Haridwar_from_Mansa_Devi_road.jpg/1280px-Haridwar_from_Mansa_Devi_road.jpg"
+            alt=""
+            fill
+            sizes="50vw"
+            className="object-cover opacity-[0.22]"
           />
+          <div className="absolute inset-0 bg-gradient-to-tr from-ink-950 via-ink-950/92 to-ink-950/70" />
+          <div className="absolute -left-24 top-0 h-96 w-96 rounded-full bg-brand/20 blur-[120px]" />
+        </div>
+        <Link href="/" className="relative flex items-center gap-3">
+          <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-xl bg-black ring-1 ring-white/10">
+            <Image
+              src="/sidkullogo.jpeg"
+              alt="SIDCUL Manufacturers Association"
+              width={1154}
+              height={846}
+              className="h-full w-full object-cover"
+            />
+          </span>
           <span className="font-display text-lg font-bold text-white">
-            SIDCUL <span className="text-accent">Hub</span>
+            SIDCUL<span className="text-brand"> Hub</span>
           </span>
         </Link>
 
         <div className="relative max-w-md border-l-2 border-brand pl-5">
-          <p className="label-tag text-sky-300">Now onboarding</p>
+          <p className="label-tag text-brand">Now onboarding</p>
           <p className="mt-3 font-display text-2xl font-bold leading-tight text-white">
             Join the hyper-local hiring network for the SIDCUL estate.
           </p>

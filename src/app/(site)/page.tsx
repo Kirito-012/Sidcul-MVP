@@ -2,7 +2,6 @@ import Link from "next/link";
 import Image from "next/image";
 import type { DirectoryCompany } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
 import { DIRECTORY_CATEGORIES } from "@/lib/constants";
 import {
   ESTATE_SECTOR_DEFS,
@@ -21,8 +20,6 @@ const POPULAR_SEARCHES = [
 ];
 
 export default async function Home() {
-  const session = await getSession();
-
   const [directoryTotal, categoryGroups, companies, allForMap, openJobs] =
     await Promise.all([
       prisma.directoryCompany.count(),
@@ -52,41 +49,48 @@ export default async function Home() {
   }));
   const otherCompanies = sectorGroups.get(OTHER_SECTOR_ID) ?? [];
 
+  const heroStats: [number, string][] = [
+    [directoryTotal, "Companies"],
+    [distinctCategoryCount, "Sectors"],
+    [openJobs, openJobs === 1 ? "Open role" : "Open roles"],
+  ];
+
   return (
     <div>
-      {/* ============== SEARCH HERO ============== */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-ink to-ink-700 text-white">
-        <div
-          className="bg-blueprint pointer-events-none absolute inset-0 opacity-[0.035]"
-          style={{
-            maskImage:
-              "radial-gradient(115% 80% at 50% 0%, #000 35%, transparent 88%)",
-            WebkitMaskImage:
-              "radial-gradient(115% 80% at 50% 0%, #000 35%, transparent 88%)",
-          }}
-        />
+      {/* ============== HERO ============== */}
+      <section className="relative overflow-hidden bg-ink-950 text-white">
+        <div className="pointer-events-none absolute inset-0">
+          <Image
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Har_Ki_Pauri_and_Clock_Tower_of_Haridwar.jpg/1920px-Har_Ki_Pauri_and_Clock_Tower_of_Haridwar.jpg"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center opacity-[0.55]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-ink-950/58 via-ink-950/80 to-ink-950" />
+          <div className="absolute left-1/2 top-[-12%] h-[460px] w-[min(900px,95vw)] -translate-x-1/2 rounded-full bg-brand/20 blur-[150px]" />
+        </div>
 
-        <CornerFrame className="mx-auto max-w-3xl px-6 py-16 text-center sm:px-5 sm:py-20">
-          <p className="label-tag mx-auto inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-accent">
+        <div className="relative mx-auto max-w-3xl px-5 py-24 text-center sm:py-32">
+          <p className="label-tag mx-auto inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/[0.04] px-3.5 py-1.5 text-slate-300">
             <span className="relative grid h-2 w-2 place-items-center">
-              <span className="spm-live absolute inset-0 rounded-full bg-accent" />
-              <span className="h-2 w-2 rounded-full bg-accent" />
+              <span className="spm-live absolute inset-0 rounded-full bg-brand" />
+              <span className="h-2 w-2 rounded-full bg-brand" />
             </span>
-            Estate Reg. No. UK-SIDCUL-HW
+            SIDCUL Manufacturers Association
           </p>
 
-          <h1 className="mx-auto mt-6 max-w-2xl font-display text-[1.7rem] font-bold leading-[1.2] sm:mt-5 sm:text-5xl sm:leading-[1.1]">
-            Find companies in the SIDCUL{" "}
-            <span className="bg-gradient-to-r from-accent to-emerald-300 bg-clip-text text-transparent">
-              Haridwar
-            </span>{" "}
-            estate
+          <h1 className="mx-auto mt-7 max-w-2xl font-display text-[2rem] font-bold leading-[1.12] sm:text-[3.35rem]">
+            Every company in the{" "}
+            <span className="text-brand">Haridwar</span> industrial estate,
+            in one place
           </h1>
 
-          <p className="mx-auto mt-5 max-w-xl text-[0.95rem] leading-relaxed text-slate-300 sm:mt-4 sm:text-[1.05rem]">
-            Search manufacturers, pharma majors and IT firms across the
-            estate — who they are, where they&apos;re based, and what they
-            do.
+          <p className="mx-auto mt-5 max-w-lg text-[1rem] leading-relaxed text-slate-300 sm:text-[1.08rem]">
+            Search {directoryTotal}{" "}
+            verified manufacturers, pharma majors and IT firms — who they
+            are, where they&apos;re based, and what they make.
           </p>
 
           {/* Search — the primary CTA */}
@@ -94,7 +98,7 @@ export default async function Home() {
             method="get"
             action="/directory"
             role="search"
-            className="mx-auto mt-8 flex max-w-xl flex-col gap-2 rounded-2xl border border-white/15 bg-white/[0.06] p-2 backdrop-blur-sm sm:mt-7 sm:flex-row sm:items-center"
+            className="mx-auto mt-9 flex max-w-xl items-center gap-2 rounded-2xl border border-white/12 bg-white/[0.06] p-2 shadow-2xl shadow-black/40 backdrop-blur"
           >
             <div className="relative flex-1">
               <SearchIcon className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
@@ -102,64 +106,46 @@ export default async function Home() {
                 name="q"
                 aria-label="Search companies by name, category or location"
                 placeholder="Search ‘Pharma’, ‘Akums’, ‘IT Park’…"
-                className="w-full rounded-xl border-0 bg-transparent py-2.5 pl-11 pr-3 text-[0.95rem] text-white outline-none placeholder:text-slate-400"
+                className="w-full border-0 bg-transparent py-2.5 pl-11 pr-3 text-[0.95rem] text-white outline-none placeholder:text-slate-400"
               />
             </div>
-            <button type="submit" className="btn btn-primary sm:px-6">
+            <button type="submit" className="btn btn-brand shrink-0 sm:px-6">
               <SearchIcon className="h-4 w-4" />
-              Search
+              <span className="hidden sm:inline">Search</span>
             </button>
           </form>
 
-          {/* Popular search shortcuts — desktop only; kept off mobile to reduce clutter */}
-          <div className="mx-auto mt-4 hidden max-w-xl flex-wrap items-center justify-center gap-2 sm:flex">
-            <span className="label-tag text-slate-400">Popular</span>
+          <div className="mx-auto mt-4 flex max-w-xl flex-wrap items-center justify-center gap-2">
+            <span className="label-tag text-slate-500">Popular</span>
             {POPULAR_SEARCHES.map((p) => (
               <Link
                 key={p.label}
                 href={`/directory?q=${encodeURIComponent(p.q)}`}
-                className="rounded-full border border-white/15 bg-white/[0.03] px-3 py-1 text-xs font-medium text-slate-200 transition-colors duration-200 hover:border-accent/50 hover:bg-accent/10 hover:text-white"
+                className="rounded-full border border-white/12 bg-white/[0.03] px-3 py-1 text-xs font-medium text-slate-300 transition-colors duration-200 hover:border-brand/60 hover:bg-brand/10 hover:text-white"
               >
                 {p.label}
               </Link>
             ))}
           </div>
 
-          {/* Coverage line — desktop only; the sector grid below already covers this on mobile */}
-          <p className="label-tag mt-6 !hidden text-slate-400 sm:!inline-flex">
-            {`${directoryTotal} companies · ${distinctCategoryCount} sectors · SIDCUL, Haridwar`}
-          </p>
-
-          <div className="mt-10 flex flex-col items-center gap-4 sm:mt-7 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-3">
-            <Link href="/directory" className="btn btn-primary w-full sm:w-auto">
-              Browse the directory
-              <ArrowIcon />
-            </Link>
-            {!session && (
-              <>
-                {/* Mobile: lightweight text link to reduce visual weight */}
-                <Link
-                  href="/register"
-                  className="text-sm font-medium text-slate-300 underline underline-offset-4 transition-colors hover:text-white sm:hidden"
-                >
-                  List your company
-                </Link>
-                {/* Desktop: full outline button */}
-                <Link
-                  href="/register"
-                  className="btn btn-outline !hidden border-white/20 bg-transparent text-white hover:border-white/40 hover:bg-white/10 hover:text-white sm:!inline-flex"
-                >
-                  List your company
-                </Link>
-              </>
-            )}
+          <div className="mt-12 flex flex-col items-center gap-6 sm:flex-row sm:justify-center sm:gap-0">
+            <dl className="flex items-center divide-x divide-white/12">
+              {heroStats.map(([n, l]) => (
+                <div key={l} className="px-6 sm:px-8">
+                  <dt className="font-display text-2xl font-bold text-white sm:text-3xl">
+                    {n}
+                  </dt>
+                  <dd className="label-tag mt-1 text-slate-400">{l}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
-        </CornerFrame>
+        </div>
 
         {/* Trust marquee */}
-        <div className="spm-marquee relative border-t border-white/10 bg-white/[0.02] py-3">
-          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-ink to-transparent" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-ink to-transparent" />
+        <div className="spm-marquee relative border-t border-white/10 py-3.5">
+          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-ink-950 to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-ink-950 to-transparent" />
           <div className="flex w-max">
             <Marquee />
             <Marquee />
@@ -243,9 +229,9 @@ export default async function Home() {
               })}
             </div>
 
-            <div className="mt-6 grid gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-2">
+            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {companies.map((company) => (
-                <CompanyRow key={company.id} company={company} />
+                <CompanyCard key={company.id} company={company} />
               ))}
             </div>
 
@@ -261,18 +247,18 @@ export default async function Home() {
 
       {/* ============== ESTATE BANNER IMAGE ============== */}
       <section className="relative overflow-hidden border-t border-line">
-        <div className="relative h-[200px] w-full">
+        <div className="relative h-[240px] w-full sm:h-[300px]">
           <Image
             src="https://images.unsplash.com/photo-1587293852726-70cdb56c2866?w=1600&q=80&auto=format&fit=crop"
-            alt="Manufacturing units in the SIDCUL industrial estate"
+            alt="Manufacturing and warehousing units in the SIDCUL industrial estate"
             fill
             sizes="100vw"
             className="object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/10 to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 mx-auto max-w-6xl px-5 pb-5">
-            <p className="label-tag text-accent">On the ground</p>
-            <p className="mt-1 font-display text-lg font-semibold text-white sm:text-xl">
+          <div className="absolute inset-0 bg-gradient-to-t from-ink-950/90 via-ink-950/35 to-ink-950/10" />
+          <div className="absolute inset-x-0 bottom-0 mx-auto max-w-6xl px-5 pb-6">
+            <p className="label-tag text-brand">On the ground</p>
+            <p className="mt-1.5 max-w-md font-display text-xl font-bold leading-snug text-white sm:text-2xl">
               550+ manufacturing units across the estate.
             </p>
           </div>
@@ -308,7 +294,7 @@ export default async function Home() {
             className="group mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-5 transition-colors duration-200 hover:bg-white"
           >
             <span className="flex items-center gap-2 text-sm font-medium text-ink">
-              <span className="spm-live h-2 w-2 shrink-0 rounded-full bg-accent" />
+              <span className="spm-live h-2 w-2 shrink-0 rounded-full bg-brand" />
               Companies are also hiring —{" "}
               <span className="font-semibold">
                 {openJobs} open {openJobs === 1 ? "role" : "roles"}
@@ -322,39 +308,41 @@ export default async function Home() {
       )}
 
       {/* ============== CTA ============== */}
-      <section className="relative overflow-hidden border-t-2 border-ink bg-ink text-white">
-        <div
-          className="bg-blueprint pointer-events-none absolute inset-0 opacity-[0.10]"
-          style={{
-            maskImage: "radial-gradient(100% 100% at 80% 50%, #000, transparent 75%)",
-            WebkitMaskImage:
-              "radial-gradient(100% 100% at 80% 50%, #000, transparent 75%)",
-          }}
-        />
-        <div className="pointer-events-none absolute -right-20 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full bg-accent/20 blur-[90px]" />
-        <div className="relative mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-5 py-16 sm:flex-row sm:items-center sm:py-20">
+      <section className="relative overflow-hidden bg-ink-950 text-white">
+        <div className="pointer-events-none absolute inset-0">
+          <Image
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Haridwar_from_Mansa_Devi_road.jpg/1280px-Haridwar_from_Mansa_Devi_road.jpg"
+            alt=""
+            fill
+            sizes="100vw"
+            className="object-cover object-right opacity-[0.18]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-ink-950 via-ink-950/90 to-ink-950/55" />
+          <div className="absolute -right-24 top-1/2 h-80 w-80 -translate-y-1/2 rounded-full bg-brand/25 blur-[110px]" />
+        </div>
+        <div className="relative mx-auto flex max-w-6xl flex-col items-start justify-between gap-8 px-5 py-20 sm:flex-row sm:items-center">
           <div>
-            <p className="label-tag inline-flex items-center gap-2 text-accent">
-              <span className="spm-live h-2 w-2 rounded-full bg-accent" />
+            <p className="label-tag inline-flex items-center gap-2 text-brand">
+              <span className="spm-live h-2 w-2 rounded-full bg-brand" />
               Now onboarding
             </p>
-            <h2 className="mt-3 max-w-xl font-display text-3xl font-bold leading-tight sm:text-4xl">
+            <h2 className="mt-4 max-w-xl font-display text-3xl font-bold leading-tight sm:text-[2.5rem]">
               Is your company part of the SIDCUL estate?
             </h2>
-            <p className="mt-3 max-w-md text-slate-300">
+            <p className="mt-4 max-w-md text-slate-300">
               Get listed in the directory so local talent and other
               businesses can find you — and post open roles directly, with
               no recruiter fees.
             </p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-3">
-            <Link href="/register" className="btn btn-primary">
+            <Link href="/register" className="btn btn-brand">
               Add your company
               <ArrowIcon />
             </Link>
             <Link
               href="/directory"
-              className="btn btn-outline border-white/20 bg-transparent text-white hover:border-white/40 hover:bg-white/10 hover:text-white"
+              className="btn btn-outline border-white/20 bg-transparent text-white hover:border-white/50 hover:bg-white/10"
             >
               Browse the directory
             </Link>
@@ -377,10 +365,10 @@ function SectionHead({
   right?: string;
 }) {
   return (
-    <div className="flex items-end justify-between gap-4 border-b-2 border-ink pb-3">
+    <div className="rule flex items-end justify-between gap-4 pb-4">
       <div>
-        <p className="label-tag mb-1.5 text-brand">{eyebrow}</p>
-        <h2 className="font-display text-2xl font-bold leading-tight text-ink sm:text-3xl">
+        <p className="label-tag mb-2 text-brand">{eyebrow}</p>
+        <h2 className="font-display text-2xl font-bold leading-tight text-ink sm:text-[1.9rem]">
           {title}
         </h2>
       </div>
@@ -438,13 +426,13 @@ function initials(name: string) {
   return ((words[0]?.[0] ?? "") + (words[1]?.[0] ?? "")).toUpperCase();
 }
 
-function CompanyRow({ company }: { company: DirectoryCompany }) {
+function CompanyCard({ company }: { company: DirectoryCompany }) {
   return (
     <Link
       href={`/directory/${company.slug}`}
-      className="group flex cursor-pointer items-center gap-3 bg-white px-4 py-3 transition-colors duration-200 hover:bg-brand-50/50"
+      className="group flex cursor-pointer items-center gap-3 rounded-xl border border-line bg-white p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-ink/25 hover:shadow-[0_18px_40px_-28px_rgba(27,26,31,0.35)]"
     >
-      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-brand to-brand-700 text-[0.65rem] font-bold text-white ring-1 ring-inset ring-white/20">
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-ink text-[0.65rem] font-bold text-white">
         {initials(company.name)}
       </span>
       <span className="min-w-0 flex-1">
@@ -503,41 +491,10 @@ function Marquee() {
           className="flex items-center gap-8 whitespace-nowrap text-sm font-medium text-slate-400"
         >
           {t}
-          <span className="text-accent/60">/</span>
+          <span className="text-brand/50">/</span>
         </span>
       ))}
     </div>
-  );
-}
-
-function CornerFrame({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={`relative ${className ?? ""}`}>
-      <Bracket className="left-3 top-3" rotate={0} />
-      <Bracket className="right-3 top-3" rotate={90} />
-      <Bracket className="bottom-3 left-3" rotate={270} />
-      <Bracket className="bottom-3 right-3" rotate={180} />
-      {children}
-    </div>
-  );
-}
-
-function Bracket({ className, rotate }: { className: string; rotate: number }) {
-  return (
-    <svg
-      viewBox="0 0 20 20"
-      className={`absolute h-5 w-5 text-white/30 ${className}`}
-      style={{ transform: `rotate(${rotate}deg)` }}
-      aria-hidden="true"
-    >
-      <path d="M1 1H8M1 1V8" stroke="currentColor" strokeWidth="1.5" />
-    </svg>
   );
 }
 

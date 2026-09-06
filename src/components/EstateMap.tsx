@@ -52,17 +52,17 @@ export default function EstateMap({
   const activeCompanies = companiesFor(selected);
   const activeLabel = labelFor(selected);
 
-  // Site palette: brand blue (--color-brand/-50) for the outline, accent
-  // green (--color-accent/-600) for the selected sector — same pairing the
-  // rest of the page uses for "informational" vs. "active/CTA" state.
+  // Site palette: warm paper fill for idle sectors, brand red for the
+  // selected zone — matching the "informational" vs. "active" pairing used
+  // across the rest of the page.
   function fillFor(id: string) {
-    if (id === selected) return "#16a34a";
-    if (id === hovered) return "#bae0fd";
-    return "#e0f2fe";
+    if (id === selected) return "#c1121f";
+    if (id === hovered) return "#e7e1d4";
+    return "#efece4";
   }
   function strokeFor(id: string) {
-    if (id === selected) return "#15803d";
-    return "#7fb3d5";
+    if (id === selected) return "#7f0b14";
+    return "#cfc8b9";
   }
 
   return (
@@ -134,7 +134,7 @@ export default function EstateMap({
                 y1={activeShape.cy}
                 x2={ESTATE_MAP_WIDTH + 12}
                 y2={activeShape.cy - 44}
-                stroke="#0b2540"
+                stroke="#1b1a1f"
                 strokeWidth="1.4"
               />
               <line
@@ -142,7 +142,7 @@ export default function EstateMap({
                 y1={activeShape.cy}
                 x2={ESTATE_MAP_WIDTH + 12}
                 y2={activeShape.cy + 38}
-                stroke="#0b2540"
+                stroke="#1b1a1f"
                 strokeWidth="1.4"
               />
               <text
@@ -150,7 +150,7 @@ export default function EstateMap({
                 y={activeShape.cy - 48}
                 className="select-none font-display font-bold"
                 fontSize="19"
-                fill="#0b2540"
+                fill="#1b1a1f"
               >
                 {labelFor(activeId)}
               </text>
@@ -159,7 +159,7 @@ export default function EstateMap({
                 y={activeShape.cy + 43}
                 className="select-none font-mono"
                 fontSize="14"
-                fill="#51677e"
+                fill="#6f6c76"
               >
                 {companiesFor(activeId).length}{" "}
                 {companiesFor(activeId).length === 1 ? "company" : "companies"}
@@ -201,7 +201,7 @@ export default function EstateMap({
                 href={`/directory/${c.slug}`}
                 className="group flex cursor-pointer items-center gap-3 px-5 py-3 transition-colors duration-200 hover:bg-brand-50/50"
               >
-                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-brand to-brand-700 text-[0.6rem] font-bold text-white ring-1 ring-inset ring-white/20">
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-ink text-[0.6rem] font-bold text-white">
                   {initialsOf(c.name)}
                 </span>
                 <span className="min-w-0 flex-1">

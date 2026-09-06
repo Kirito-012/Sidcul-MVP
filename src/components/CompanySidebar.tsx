@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSidebarCollapse, SidebarChevron } from "@/components/useSidebarCollapse";
 
 type NavItem = {
   href: string;
@@ -66,16 +67,22 @@ export default function CompanySidebar({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { collapsed, toggle } = useSidebarCollapse();
 
   return (
     <div className="flex w-full">
       {/* ============== DESKTOP SIDEBAR ============== */}
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-ink lg:flex">
+      <aside
+        style={{ width: collapsed ? "4rem" : "16rem" }}
+        className="sticky top-0 hidden h-screen min-w-0 shrink-0 flex-col overflow-hidden bg-ink lg:flex"
+      >
         <SidebarContent
           pathname={pathname}
           companyName={companyName}
           verified={verified}
           logoutAction={logoutAction}
+          collapsed={collapsed}
+          onToggle={toggle}
         />
       </aside>
 
@@ -95,7 +102,7 @@ export default function CompanySidebar({
               </button>
             </form>
           </div>
-          <div className="flex gap-1.5 overflow-x-auto border-b-2 border-ink px-3 py-2.5">
+          <div className="flex gap-1.5 overflow-x-auto border-b border-line px-3 py-2.5">
             {ALL_ITEMS.map((item) => {
               const active = item.match(pathname);
               const Icon = item.icon;
@@ -128,71 +135,132 @@ function SidebarContent({
   companyName,
   verified,
   logoutAction,
+  collapsed,
+  onToggle,
 }: {
   pathname: string;
   companyName: string;
   verified: boolean;
   logoutAction: () => Promise<void>;
+  collapsed: boolean;
+  onToggle: () => void;
 }) {
   return (
     <div className="flex h-full flex-col">
-      {/* Company identity */}
-      <div className="mx-4 mt-4 rounded-xl bg-white/5 p-3.5">
-        <p className="truncate text-sm font-semibold text-white">{companyName}</p>
-        <span
-          className={`badge mt-1.5 ${
-            verified
-              ? "bg-accent-50 text-accent-600"
-              : "bg-amber-100 text-amber-800"
-          }`}
+      {/* Header + collapse toggle */}
+      <div
+        className={`flex items-center pt-3 ${
+          collapsed ? "justify-center px-2" : "justify-between px-4"
+        }`}
+      >
+        {!collapsed && (
+          <span className="font-display text-sm font-bold tracking-tight text-white">
+            SIDCUL<span className="text-brand"> Hub</span>
+          </span>
+        )}
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          title={collapsed ? "Expand" : "Collapse"}
+          className="grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-lg text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
         >
-          {verified ? (
-            <>
-              <CheckIcon className="h-3 w-3" />
-              Verified
-            </>
-          ) : (
-            "Pending verification"
-          )}
-        </span>
+          <SidebarChevron collapsed={collapsed} />
+        </button>
       </div>
 
+      {/* Company identity */}
+      {collapsed ? (
+        <div
+          title={companyName}
+          className="mx-auto mt-3 grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/10 text-sm font-bold text-white"
+        >
+          {companyName.trim().charAt(0).toUpperCase()}
+        </div>
+      ) : (
+        <div className="mx-4 mt-3 rounded-xl bg-white/5 p-3.5">
+          <p className="truncate text-sm font-semibold text-white">
+            {companyName}
+          </p>
+          <span
+            className={`badge mt-1.5 ${
+              verified
+                ? "bg-accent-50 text-accent-600"
+                : "bg-amber-100 text-amber-800"
+            }`}
+          >
+            {verified ? (
+              <>
+                <CheckIcon className="h-3 w-3" />
+                Verified
+              </>
+            ) : (
+              "Pending verification"
+            )}
+          </span>
+        </div>
+      )}
+
       {/* Nav */}
-      <nav className="mt-6 flex-1 space-y-6 overflow-y-auto px-3">
+      <nav
+        className={`mt-6 flex-1 space-y-6 overflow-y-auto overflow-x-hidden ${
+          collapsed ? "px-2" : "px-3"
+        }`}
+      >
         <div>
-          <p className="label-tag px-2.5 text-slate-400">Manage</p>
+          {!collapsed && (
+            <p className="label-tag px-2.5 text-slate-400">Manage</p>
+          )}
           <div className="mt-2 space-y-0.5">
             {MANAGE_ITEMS.map((item) => (
-              <SidebarLink key={item.href} item={item} active={item.match(pathname)} />
+              <SidebarLink
+                key={item.href}
+                item={item}
+                active={item.match(pathname)}
+                collapsed={collapsed}
+              />
             ))}
           </div>
         </div>
         <div>
-          <p className="label-tag px-2.5 text-slate-400">Marketplace</p>
+          {!collapsed && (
+            <p className="label-tag px-2.5 text-slate-400">Marketplace</p>
+          )}
           <div className="mt-2 space-y-0.5">
             {MARKETPLACE_ITEMS.map((item) => (
-              <SidebarLink key={item.href} item={item} active={item.match(pathname)} />
+              <SidebarLink
+                key={item.href}
+                item={item}
+                active={item.match(pathname)}
+                collapsed={collapsed}
+              />
             ))}
           </div>
         </div>
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-white/10 p-3">
+      <div className={`border-t border-white/10 ${collapsed ? "p-2" : "p-3"}`}>
         <Link
           href="/"
-          className="flex items-center gap-2.5 rounded-lg px-2.5 py-2.5 text-sm font-medium text-slate-300 transition-colors hover:bg-white/10 hover:text-white"
+          title={collapsed ? "Home" : undefined}
+          className={`flex items-center rounded-lg text-sm font-medium text-slate-300 transition-colors hover:bg-white/10 hover:text-white ${
+            collapsed ? "justify-center py-2.5" : "gap-2.5 px-2.5 py-2.5"
+          }`}
         >
           <HomeIcon className="h-4.5 w-4.5 shrink-0" />
-          Home
+          {!collapsed && "Home"}
         </Link>
         <form action={logoutAction}>
           <button
             type="submit"
-            className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-2.5 text-sm font-medium text-slate-300 transition-colors hover:bg-white/10 hover:text-white"
+            title={collapsed ? "Log out" : undefined}
+            className={`flex w-full cursor-pointer items-center rounded-lg text-sm font-medium text-slate-300 transition-colors hover:bg-white/10 hover:text-white ${
+              collapsed ? "justify-center py-2.5" : "gap-2.5 px-2.5 py-2.5"
+            }`}
           >
             <LogoutIcon className="h-4.5 w-4.5 shrink-0" />
-            Log out
+            {!collapsed && "Log out"}
           </button>
         </form>
       </div>
@@ -200,19 +268,30 @@ function SidebarContent({
   );
 }
 
-function SidebarLink({ item, active }: { item: NavItem; active: boolean }) {
+function SidebarLink({
+  item,
+  active,
+  collapsed,
+}: {
+  item: NavItem;
+  active: boolean;
+  collapsed: boolean;
+}) {
   const Icon = item.icon;
   return (
     <Link
       href={item.href}
-      className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2.5 text-sm font-medium transition-colors ${
+      title={collapsed ? item.label : undefined}
+      className={`flex items-center rounded-lg text-sm font-medium transition-colors ${
+        collapsed ? "justify-center py-2.5" : "gap-2.5 px-2.5 py-2.5"
+      } ${
         active
           ? "bg-white text-ink"
           : "text-slate-300 hover:bg-white/10 hover:text-white"
       }`}
     >
       <Icon className="h-4.5 w-4.5 shrink-0" />
-      {item.label}
+      {!collapsed && item.label}
     </Link>
   );
 }

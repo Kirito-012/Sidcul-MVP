@@ -8,7 +8,8 @@ import {
   hashPassword,
   verifyPassword,
 } from "@/lib/auth";
-import type { ActionState, Role } from "@/lib/constants";
+import { GST_RE, INDIAN_PHONE_RE, OTHER_SECTOR_VALUE, type ActionState, type Role } from "@/lib/constants";
+import { uploadFileToCloudinary } from "@/lib/cloudinary";
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
@@ -35,15 +36,56 @@ export async function registerAction(
   }
 
   const companyName = str(formData, "companyName");
-  const sector = str(formData, "sector");
+  const rawSector = str(formData, "sector");
+  const sectorOther = str(formData, "sectorOther");
   const location = str(formData, "location");
-  if (role === "COMPANY" && !companyName) {
-    return { error: "Company name is required." };
+  const phoneRaw = str(formData, "phone");
+  const gstNumber = str(formData, "gstNumber").toUpperCase();
+  const emDocument = formData.get("emDocument");
+
+  let sector = rawSector;
+  let phone: string | null = null;
+
+  if (role === "COMPANY") {
+    if (!companyName) return { error: "Company name is required." };
+
+    if (rawSector === OTHER_SECTOR_VALUE) {
+      if (!sectorOther) return { error: "Please describe your sector." };
+      sector = sectorOther;
+    }
+
+    const phoneDigits = phoneRaw.replace(/[\s-]/g, "");
+    if (!INDIAN_PHONE_RE.test(phoneDigits)) {
+      return { error: "Enter a valid Indian mobile number (10 digits)." };
+    }
+    phone = `+91${phoneDigits.replace(/^(?:\+91|91|0)/, "")}`;
+
+    if (gstNumber && !GST_RE.test(gstNumber)) {
+      return { error: "Enter a valid 15-character GSTIN, or leave it blank." };
+    }
   }
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
     return { error: "An account with this email already exists." };
+  }
+
+  // Upload the EM / Udyam document to Cloudinary before creating the account
+  // so the URL can be stored on the profile in one write.
+  let emDocumentUrl: string | null = null;
+  if (role === "COMPANY" && emDocument instanceof File && emDocument.size > 0) {
+    if (emDocument.size > 8 * 1024 * 1024) {
+      return { error: "Document is too large (max 8 MB)." };
+    }
+    try {
+      const uploaded = await uploadFileToCloudinary(emDocument, {
+        folder: "sidcul/em-documents",
+        kind: "auto",
+      });
+      emDocumentUrl = uploaded.url;
+    } catch {
+      return { error: "Could not upload the document. Please try again." };
+    }
   }
 
   const passwordHash = await hashPassword(password);
@@ -61,6 +103,9 @@ export async function registerAction(
                 companyName,
                 sector: sector || null,
                 location: location || null,
+                phone,
+                gstNumber: gstNumber || null,
+                emDocumentUrl,
                 verified: false,
               },
             },

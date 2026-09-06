@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
 import { JOB_TYPE_LABELS } from "@/lib/constants";
 import { setJobStatusAction } from "@/lib/actions/job-actions";
+import CompanyMediaForm from "@/components/forms/CompanyMediaForm";
 
 export default async function CompanyDashboard() {
   const session = await requireRole("COMPANY");
@@ -10,6 +11,7 @@ export default async function CompanyDashboard() {
   const company = await prisma.companyProfile.findUnique({
     where: { userId: session.userId },
     include: {
+      directoryCompany: { select: { slug: true } },
       jobs: {
         orderBy: { createdAt: "desc" },
         include: { _count: { select: { applications: true } } },
@@ -82,6 +84,23 @@ export default async function CompanyDashboard() {
           </div>
         </div>
       )}
+
+      {/* ============== COMPANY MEDIA ============== */}
+      <div className="mt-6">
+        <CompanyMediaForm
+          companyName={company.companyName}
+          about={company.about}
+          website={company.website}
+          whatsappNumber={company.whatsappNumber}
+          contactEmail={company.contactEmail}
+          mapUrl={company.mapUrl}
+          location={company.location}
+          logoUrl={company.logoUrl}
+          galleryImage1Url={company.galleryImage1Url}
+          galleryImage2Url={company.galleryImage2Url}
+          linkedSlug={company.directoryCompany?.slug ?? null}
+        />
+      </div>
 
       {company.verified && (
         <>

@@ -94,7 +94,7 @@ export default async function DirectoryPage({
         </div>
       </section>
 
-      <div className="mx-auto max-w-6xl px-5 py-10 lg:grid lg:grid-cols-[260px_1fr] lg:items-start lg:gap-10">
+      <div className="mx-auto max-w-6xl px-5 py-10 lg:grid lg:grid-cols-[260px_minmax(0,1fr)] lg:items-start lg:gap-10">
         {/* ============== SIDEBAR: facets ============== */}
         <aside className="lg:sticky lg:top-20 lg:self-start">
           <div className="rounded-2xl border border-line bg-white p-4">
@@ -159,8 +159,8 @@ export default async function DirectoryPage({
         </aside>
 
         {/* ============== MAIN: results list ============== */}
-        <main className="mt-8 lg:mt-0">
-          <div className="flex items-center justify-between border-b-2 border-ink pb-3">
+        <main className="mt-8 min-w-0 lg:mt-0">
+          <div className="flex items-center justify-between border-b border-line pb-3">
             <p className="label-tag text-muted">
               {isFiltered ? (
                 <>
@@ -286,7 +286,7 @@ function DirectoryListRow({
         )}
       </span>
       {company.category && (
-        <span className="hidden shrink-0 rounded-full bg-brand-50 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wider text-brand-700 sm:inline-flex">
+        <span className="hidden max-w-[7.5rem] shrink-0 truncate whitespace-nowrap rounded-full bg-brand-50 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wider text-brand-700 md:inline-block xl:max-w-[13rem]">
           {company.category}
         </span>
       )}

@@ -78,7 +78,7 @@ export default function MobileNavMenu({
 
       {mounted && (
         <div
-          className="absolute inset-x-0 top-full overflow-hidden border-b-2 border-ink bg-white shadow-lg transition-all ease-in-out"
+          className="absolute inset-x-0 top-full overflow-hidden border-b border-line bg-white shadow-lg transition-all ease-in-out"
           style={{
             transitionDuration: `${TRANSITION_MS}ms`,
             maxHeight: open ? "24rem" : "0px",

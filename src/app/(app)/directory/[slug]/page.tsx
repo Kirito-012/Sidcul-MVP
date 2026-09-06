@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -17,36 +18,77 @@ export default async function DirectoryCompanyPage({
   const { slug } = await params;
 
   const [company, session] = await Promise.all([
-    prisma.directoryCompany.findUnique({ where: { slug } }),
+    prisma.directoryCompany.findUnique({
+      where: { slug },
+      include: {
+        companyProfiles: {
+          where: { verified: true },
+          take: 1,
+          include: {
+            _count: { select: { jobs: true } },
+          },
+        },
+      },
+    }),
     getSession(),
   ]);
   if (!company) notFound();
 
   const unlocked = session !== null;
 
-  const website = company.website
-    ? company.website.startsWith("http")
-      ? company.website
-      : `https://${company.website}`
+  // A verified, registered account that owns this listing (adds logo + gallery
+  // + its own contact details, which take precedence over the scraped ones).
+  const owner = company.companyProfiles[0] ?? null;
+  const gallery = [owner?.galleryImage1Url, owner?.galleryImage2Url].filter(
+    (u): u is string => Boolean(u),
+  );
+
+  const rawWebsite = owner?.website ?? company.website;
+  const website = rawWebsite
+    ? rawWebsite.startsWith("http")
+      ? rawWebsite
+      : `https://${rawWebsite}`
     : null;
+  const phone = owner?.phone ?? company.phone;
+  const email = owner?.contactEmail ?? company.email;
+  const whatsapp = owner?.whatsappNumber ?? null;
+  const whatsappDigits = whatsapp?.replace(/[^\d]/g, "") ?? null;
+
+  // Google Maps: the owner's pasted link if set, otherwise a search built from
+  // the listing's address so every company still gets a "Directions" button.
+  const addressForMap = [company.address, "Haridwar, Uttarakhand"]
+    .filter(Boolean)
+    .join(", ");
+  const mapUrl =
+    owner?.mapUrl ??
+    (company.address
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressForMap)}`
+      : null);
+
+  // Member-directory rows store the contact person in `description` as
+  // "Contact: NAME" — surface it as its own field, and keep it out of the
+  // free-text "About" block.
+  const contactPerson = /^contact:/i.test(company.description ?? "")
+    ? company.description!.replace(/^contact:\s*/i, "")
+    : null;
+  const aboutText =
+    owner?.about ?? (contactPerson ? null : company.description);
 
   return (
     <div>
       {/* Header band — mirrors the directory hero for continuity */}
-      <section className="relative overflow-hidden bg-ink text-white">
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.10]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,0.7) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.7) 1px, transparent 1px)",
-            backgroundSize: "44px 44px",
-            maskImage:
-              "radial-gradient(120% 90% at 20% 0%, #000 40%, transparent 90%)",
-            WebkitMaskImage:
-              "radial-gradient(120% 90% at 20% 0%, #000 40%, transparent 90%)",
-          }}
-        />
-        <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-brand/30 blur-3xl" />
+      <section className="relative overflow-hidden bg-ink-950 text-white">
+        <div className="pointer-events-none absolute inset-0">
+          <Image
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Haridwar_from_Mansa_Devi_road.jpg/1280px-Haridwar_from_Mansa_Devi_road.jpg"
+            alt=""
+            fill
+            sizes="100vw"
+            className="object-cover object-[center_30%] opacity-[0.2]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-ink-950/78 via-ink-950/90 to-ink-950" />
+          <div className="absolute -right-24 -top-24 h-96 w-96 rounded-full bg-brand/25 blur-[110px]" />
+        </div>
 
         <div className="relative mx-auto max-w-3xl px-5 pb-20 pt-10 sm:pt-12">
           <Link
@@ -58,17 +100,33 @@ export default async function DirectoryCompanyPage({
           </Link>
 
           <div className="mt-6 flex items-start gap-4 sm:gap-5">
-            <span className="relative grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-gradient-to-br from-brand to-brand-700 font-display text-xl font-bold text-white shadow-[0_10px_24px_-8px_rgba(3,105,161,0.8)] ring-1 ring-inset ring-white/20 sm:h-20 sm:w-20 sm:text-2xl">
-              <span className="absolute inset-0 bg-gradient-to-tr from-white/0 to-white/15" />
-              {initialsOf(company.name)}
+            <span className="relative grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-ink font-display text-xl font-bold text-white ring-1 ring-inset ring-white/15 sm:h-20 sm:w-20 sm:text-2xl">
+              {owner?.logoUrl ? (
+                <Image
+                  src={owner.logoUrl}
+                  alt={`${company.name} logo`}
+                  fill
+                  sizes="80px"
+                  className="object-cover"
+                />
+              ) : (
+                initialsOf(company.name)
+              )}
             </span>
             <div className="min-w-0">
-              {company.category && (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-wider text-accent ring-1 ring-inset ring-white/15">
-                  <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-                  {company.category}
-                </span>
-              )}
+              <div className="flex flex-wrap items-center gap-2">
+                {company.category && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-wider text-slate-200 ring-1 ring-inset ring-white/15">
+                    {company.category}
+                  </span>
+                )}
+                {owner && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-brand/15 px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-wider text-brand ring-1 ring-inset ring-brand/30">
+                    <span className="h-1.5 w-1.5 rounded-full bg-brand" />
+                    Registered member
+                  </span>
+                )}
+              </div>
               <h1 className="mt-2 font-display text-2xl font-bold leading-tight sm:text-3xl">
                 {company.name}
               </h1>
@@ -82,12 +140,31 @@ export default async function DirectoryCompanyPage({
       </section>
 
       <div className="mx-auto max-w-3xl px-5 pb-16">
-        <div className="card relative z-10 -mt-10 overflow-hidden shadow-[0_24px_60px_-28px_rgba(11,37,64,0.4)]">
-          {company.description && (
+        <div className="card relative z-10 -mt-10 overflow-hidden shadow-[0_24px_60px_-28px_rgba(27,26,31,0.4)]">
+          {gallery.length > 0 && (
+            <div className="grid gap-3 border-b border-line p-4 sm:grid-cols-2 sm:p-5">
+              {gallery.map((src, i) => (
+                <div
+                  key={i}
+                  className="relative aspect-[4/3] overflow-hidden rounded-xl bg-canvas ring-1 ring-inset ring-line"
+                >
+                  <Image
+                    src={src}
+                    alt={`${company.name} — photo ${i + 1}`}
+                    fill
+                    sizes="(min-width: 640px) 320px, 100vw"
+                    className="object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {aboutText && (
             <div className="border-b border-line p-6 sm:p-7">
               <p className="label-tag mb-2.5 text-muted">About</p>
               <p className="leading-relaxed text-ink-700">
-                <LockedField unlocked={unlocked}>{company.description}</LockedField>
+                <LockedField unlocked={unlocked}>{aboutText}</LockedField>
               </p>
             </div>
           )}
@@ -96,25 +173,43 @@ export default async function DirectoryCompanyPage({
           <dl className="divide-y divide-line">
             {company.address && <Field label="Address">{company.address}</Field>}
             {company.pincode && <Field label="Pincode">{company.pincode}</Field>}
-            {company.phone && (
+            {mapUrl && (
+              <Field label="Location">
+                <a
+                  href={mapUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-brand hover:underline"
+                >
+                  <PinIcon className="h-4 w-4 shrink-0" />
+                  View on Google Maps
+                </a>
+              </Field>
+            )}
+            {contactPerson && (
+              <Field label="Contact person">
+                <LockedField unlocked={unlocked}>{contactPerson}</LockedField>
+              </Field>
+            )}
+            {phone && (
               <Field label="Phone">
                 <LockedField unlocked={unlocked}>
                   <a
-                    href={`tel:${company.phone}`}
+                    href={`tel:${phone}`}
                     className="text-brand hover:underline"
                   >
-                    {company.phone}
+                    {phone}
                   </a>
                 </LockedField>
               </Field>
             )}
-            {company.email && (
+            {email && (
               <Field label="Email">
                 <a
-                  href={`mailto:${company.email}`}
+                  href={`mailto:${email}`}
                   className="break-all text-brand hover:underline"
                 >
-                  {company.email}
+                  {email}
                 </a>
               </Field>
             )}
@@ -126,27 +221,49 @@ export default async function DirectoryCompanyPage({
                   rel="noopener noreferrer"
                   className="break-all text-brand hover:underline"
                 >
-                  {company.website}
+                  {website.replace(/^https?:\/\//, "")}
                 </a>
               </Field>
             )}
           </dl>
 
           {/* Action footer */}
-          {(company.phone || website) && (
-            <div className="flex flex-col gap-2 border-t border-line bg-canvas p-5 sm:flex-row sm:items-center sm:justify-between">
+          {(phone || whatsapp || mapUrl || website) && (
+            <div className="border-t border-line bg-canvas p-5">
               <p className="text-sm text-muted">
                 Get in touch with{" "}
                 <span className="font-semibold text-ink">{company.name}</span>
               </p>
-              <div className="flex gap-2">
-                {company.phone && (
+              <div className="mt-3 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
+                {phone && (
                   <a
-                    href={unlocked ? `tel:${company.phone}` : "/login"}
-                    className="btn btn-outline btn-sm"
+                    href={unlocked ? `tel:${phone}` : "/login"}
+                    className="btn btn-outline btn-sm w-full sm:w-auto"
                   >
                     <PhoneIcon className="h-4 w-4" />
                     {unlocked ? "Call" : "Sign in to call"}
+                  </a>
+                )}
+                {whatsapp && whatsappDigits && (
+                  <a
+                    href={unlocked ? `https://wa.me/${whatsappDigits}` : "/login"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-outline btn-sm w-full sm:w-auto"
+                  >
+                    <WhatsAppIcon className="h-4 w-4" />
+                    WhatsApp
+                  </a>
+                )}
+                {mapUrl && (
+                  <a
+                    href={mapUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-outline btn-sm w-full sm:w-auto"
+                  >
+                    <PinIcon className="h-4 w-4" />
+                    Directions
                   </a>
                 )}
                 {website && (
@@ -154,7 +271,7 @@ export default async function DirectoryCompanyPage({
                     href={website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="btn btn-primary btn-sm"
+                    className="btn btn-primary btn-sm w-full sm:w-auto"
                   >
                     <GlobeIcon className="h-4 w-4" />
                     Visit website
@@ -225,6 +342,14 @@ function PhoneIcon({ className }: { className?: string }) {
         strokeWidth="1.7"
         strokeLinejoin="round"
       />
+    </svg>
+  );
+}
+
+function WhatsAppIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.46 1.32 4.97L2 22l5.25-1.38a9.9 9.9 0 004.79 1.22h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0012.04 2zm0 1.67c2.2 0 4.27.86 5.83 2.42a8.2 8.2 0 012.42 5.82c0 4.54-3.7 8.24-8.25 8.24a8.23 8.23 0 01-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 01-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24zm-3.6 4.42c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1s.9 2.44 1.03 2.6c.13.18 1.76 2.8 4.37 3.82 2.16.85 2.6.68 3.07.64.47-.04 1.52-.62 1.73-1.22.21-.6.21-1.11.15-1.22-.06-.11-.23-.17-.48-.3-.25-.12-1.52-.75-1.75-.83-.23-.09-.4-.13-.57.12-.17.25-.65.83-.8 1-.14.17-.29.19-.54.06-.25-.12-1.06-.39-2.02-1.24-.74-.66-1.24-1.48-1.39-1.73-.14-.25-.01-.38.11-.5.11-.11.25-.29.38-.44.12-.15.16-.25.25-.42.08-.17.04-.31-.02-.44-.06-.12-.55-1.37-.77-1.87-.2-.48-.4-.42-.55-.42h-.48z" />
     </svg>
   );
 }

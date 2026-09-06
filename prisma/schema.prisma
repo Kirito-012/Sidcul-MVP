@@ -34,9 +34,30 @@ model CompanyProfile {
   about       String?
   location    String?
   website     String?
-  sector      String? // Pharmaceuticals | FMCG & Packaging | Electrical & Auto | Allied Services
+  whatsappNumber String? // public WhatsApp contact, e.g. +91 87555 00021
+  contactEmail   String? // public contact email (distinct from the login email on User)
+  mapUrl         String? // Google Maps share link / place URL for the company's location
+  sector      String? // one of SECTORS, or a free-text value when "Others" was chosen
+  phone       String? // Indian mobile, e.g. +91 98765 43210
+  gstNumber   String? // 15-char GSTIN
+  emDocumentUrl String? // Entrepreneurs Memorandum / Udyam registration doc, uploaded to Cloudinary
   verified    Boolean  @default(false)
   createdAt   DateTime @default(now())
+
+  // Public-directory media, uploaded from the company dashboard. Only shown
+  // on the public directory page when this profile is linked to one below.
+  logoUrl        String?
+  galleryImage1Url String?
+  galleryImage2Url String?
+
+  // Optional 1:1 link to a public DirectoryCompany listing — lets a real
+  // company account (verified via signup/admin) own and enrich a directory
+  // page with a logo + gallery, without touching the scraped directory data.
+  // Not marked @unique: MongoDB's unique index rejects multiple `null`s,
+  // which every unlinked profile would have. Uniqueness (at most one
+  // CompanyProfile per DirectoryCompany) is enforced in application code.
+  directoryCompanyId String?           @db.ObjectId
+  directoryCompany    DirectoryCompany? @relation(fields: [directoryCompanyId], references: [id])
 
   jobs Job[]
   equipment     Equipment[]    @relation("EquipmentOwner")
@@ -146,4 +167,10 @@ model DirectoryCompany {
   description String?
   sourceUrl   String   @unique
   createdAt   DateTime @default(now())
+
+  // Present only for the handful of listings owned by a real registered
+  // CompanyProfile (see the relation field there). Modeled as one-to-many
+  // on the Prisma side (Mongo can't enforce a unique FK that's also
+  // nullable), but application code only ever links at most one.
+  companyProfiles CompanyProfile[]
 }

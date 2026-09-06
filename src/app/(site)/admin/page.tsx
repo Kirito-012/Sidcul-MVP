@@ -51,6 +51,21 @@ export default async function AdminDashboard() {
                 {company._count.jobs} job
                 {company._count.jobs === 1 ? "" : "s"}
               </p>
+              {(company.mapUrl ?? company.location) && (
+                <a
+                  href={
+                    company.mapUrl ??
+                    `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                      `${company.companyName}, ${company.location ?? "Haridwar"}`,
+                    )}`
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-brand hover:underline"
+                >
+                  📍 {company.mapUrl ? "View location" : "Search on Maps"}
+                </a>
+              )}
             </div>
 
             <form action={setCompanyVerifiedAction}>
