@@ -39,8 +39,8 @@ model CompanyProfile {
   mapUrl         String? // Google Maps share link / place URL for the company's location
   sector      String? // one of SECTORS, or a free-text value when "Others" was chosen
   phone       String? // Indian mobile, e.g. +91 98765 43210
-  gstNumber   String? // 15-char GSTIN
-  emDocumentUrl String? // Entrepreneurs Memorandum / Udyam registration doc, uploaded to Cloudinary
+  gstDocumentUrl String? // GST certificate, uploaded to Cloudinary at signup
+  emDocumentUrl  String? // EM Part 1, uploaded to Cloudinary at signup
   verified    Boolean  @default(false)
   createdAt   DateTime @default(now())
 

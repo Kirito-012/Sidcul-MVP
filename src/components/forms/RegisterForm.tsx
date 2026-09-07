@@ -6,7 +6,6 @@ import {
   SECTORS,
   OTHER_SECTOR_VALUE,
   INDIAN_PHONE_RE,
-  GST_RE,
   type ActionState,
 } from "@/lib/constants";
 import SubmitButton from "@/components/forms/SubmitButton";
@@ -18,10 +17,12 @@ const EMPTY = {
   sectorOther: "",
   location: "",
   phone: "",
-  gstNumber: "",
   email: "",
   password: "",
 };
+
+const DOC_INPUT_CLASS =
+  "input cursor-pointer file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-accent file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white";
 
 export default function RegisterForm() {
   const [state, formAction] = useActionState(registerAction, {} as ActionState);
@@ -51,10 +52,6 @@ export default function RegisterForm() {
     }
     if (!INDIAN_PHONE_RE.test(f.phone.replace(/[\s-]/g, ""))) {
       return setStepError("Enter a valid Indian mobile number (10 digits).");
-    }
-    const gst = f.gstNumber.toUpperCase();
-    if (gst && !GST_RE.test(gst)) {
-      return setStepError("Enter a valid 15-character GSTIN, or leave it blank.");
     }
     setStepError(null);
     setStep(2);
@@ -199,47 +196,37 @@ export default function RegisterForm() {
               </Field>
             )}
 
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Phone number" htmlFor="phone">
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  inputMode="numeric"
-                  className="input"
-                  placeholder="98765 43210"
-                  value={f.phone}
-                  onChange={upd("phone")}
-                />
-              </Field>
-              <Field label="GST number" htmlFor="gstNumber">
-                <input
-                  id="gstNumber"
-                  name="gstNumber"
-                  className="input uppercase"
-                  placeholder="15-digit GSTIN"
-                  maxLength={15}
-                  value={f.gstNumber}
-                  onChange={upd("gstNumber")}
-                />
-              </Field>
-            </div>
+            <Field label="Phone number" htmlFor="phone">
+              <input
+                id="phone"
+                name="phone"
+                type="tel"
+                inputMode="numeric"
+                className="input"
+                placeholder="98765 43210"
+                value={f.phone}
+                onChange={upd("phone")}
+              />
+            </Field>
 
-            <Field
-              label="EM / Udyam registration document"
-              htmlFor="emDocument"
-            >
+            <Field label="GST number" htmlFor="gstDocument">
+              <input
+                id="gstDocument"
+                name="gstDocument"
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png"
+                className={DOC_INPUT_CLASS}
+              />
+            </Field>
+
+            <Field label="EM Part 1" htmlFor="emDocument">
               <input
                 id="emDocument"
                 name="emDocument"
                 type="file"
                 accept=".pdf,.jpg,.jpeg,.png"
-                className="input cursor-pointer file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-accent file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white"
+                className={DOC_INPUT_CLASS}
               />
-              <p className="mt-1 text-xs text-muted">
-                PDF or image of your Entrepreneurs Memorandum / Udyam
-                certificate. Optional now, but speeds up verification.
-              </p>
             </Field>
 
             <button

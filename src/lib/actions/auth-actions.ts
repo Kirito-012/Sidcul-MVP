@@ -8,8 +8,23 @@ import {
   hashPassword,
   verifyPassword,
 } from "@/lib/auth";
-import { GST_RE, INDIAN_PHONE_RE, OTHER_SECTOR_VALUE, type ActionState, type Role } from "@/lib/constants";
+import { INDIAN_PHONE_RE, OTHER_SECTOR_VALUE, type ActionState, type Role } from "@/lib/constants";
 import { uploadFileToCloudinary } from "@/lib/cloudinary";
+
+const MAX_DOC_BYTES = 8 * 1024 * 1024; // 8 MB
+
+/** Upload an optional signup document to Cloudinary; returns its URL or null. */
+async function uploadSignupDoc(
+  value: FormDataEntryValue | null,
+  folder: string,
+): Promise<string | null> {
+  if (!(value instanceof File) || value.size === 0) return null;
+  if (value.size > MAX_DOC_BYTES) {
+    throw new Error("Document is too large (max 8 MB).");
+  }
+  const uploaded = await uploadFileToCloudinary(value, { folder, kind: "auto" });
+  return uploaded.url;
+}
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
@@ -40,8 +55,6 @@ export async function registerAction(
   const sectorOther = str(formData, "sectorOther");
   const location = str(formData, "location");
   const phoneRaw = str(formData, "phone");
-  const gstNumber = str(formData, "gstNumber").toUpperCase();
-  const emDocument = formData.get("emDocument");
 
   let sector = rawSector;
   let phone: string | null = null;
@@ -59,10 +72,6 @@ export async function registerAction(
       return { error: "Enter a valid Indian mobile number (10 digits)." };
     }
     phone = `+91${phoneDigits.replace(/^(?:\+91|91|0)/, "")}`;
-
-    if (gstNumber && !GST_RE.test(gstNumber)) {
-      return { error: "Enter a valid 15-character GSTIN, or leave it blank." };
-    }
   }
 
   const existing = await prisma.user.findUnique({ where: { email } });
@@ -70,21 +79,23 @@ export async function registerAction(
     return { error: "An account with this email already exists." };
   }
 
-  // Upload the EM / Udyam document to Cloudinary before creating the account
-  // so the URL can be stored on the profile in one write.
+  // Upload the optional GST certificate + EM Part 1 to Cloudinary before
+  // creating the account so the URLs can be stored on the profile in one write.
+  let gstDocumentUrl: string | null = null;
   let emDocumentUrl: string | null = null;
-  if (role === "COMPANY" && emDocument instanceof File && emDocument.size > 0) {
-    if (emDocument.size > 8 * 1024 * 1024) {
-      return { error: "Document is too large (max 8 MB)." };
-    }
+  if (role === "COMPANY") {
     try {
-      const uploaded = await uploadFileToCloudinary(emDocument, {
-        folder: "sidcul/em-documents",
-        kind: "auto",
-      });
-      emDocumentUrl = uploaded.url;
-    } catch {
-      return { error: "Could not upload the document. Please try again." };
+      [gstDocumentUrl, emDocumentUrl] = await Promise.all([
+        uploadSignupDoc(formData.get("gstDocument"), "sidcul/gst-documents"),
+        uploadSignupDoc(formData.get("emDocument"), "sidcul/em-documents"),
+      ]);
+    } catch (e) {
+      return {
+        error:
+          e instanceof Error
+            ? e.message
+            : "Could not upload a document. Please try again.",
+      };
     }
   }
 
@@ -104,7 +115,7 @@ export async function registerAction(
                 sector: sector || null,
                 location: location || null,
                 phone,
-                gstNumber: gstNumber || null,
+                gstDocumentUrl,
                 emDocumentUrl,
                 verified: false,
               },

@@ -15,7 +15,7 @@ export default async function Nav() {
           </span>
           <span className="hidden h-3 w-px bg-line sm:block" />
           <span className="label-tag hidden text-[0.6rem] text-muted sm:inline">
-            Haridwar
+            SMAUDIR
           </span>
         </Link>
 
