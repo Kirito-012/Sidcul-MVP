@@ -92,14 +92,14 @@ export default function MobileNavMenu({
               onClick={closeMenu}
               className="rounded-lg px-3 py-2.5 text-ink-700 transition-colors duration-200 hover:bg-brand-50 hover:text-brand"
             >
-              Browse Jobs
+              Job Portal
             </Link>
             <Link
               href="/directory"
               onClick={closeMenu}
               className="rounded-lg px-3 py-2.5 text-ink-700 transition-colors duration-200 hover:bg-brand-50 hover:text-brand"
             >
-              IT Directory
+              Directory Hub
             </Link>
             {session?.role !== "STUDENT" && (
               <Link
@@ -107,7 +107,7 @@ export default function MobileNavMenu({
                 onClick={closeMenu}
                 className="rounded-lg px-3 py-2.5 text-ink-700 transition-colors duration-200 hover:bg-brand-50 hover:text-brand"
               >
-                Lease Equipment
+                Marketplace
               </Link>
             )}
 

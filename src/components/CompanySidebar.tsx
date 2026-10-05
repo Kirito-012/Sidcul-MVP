@@ -35,19 +35,19 @@ const MANAGE_ITEMS: NavItem[] = [
 const MARKETPLACE_ITEMS: NavItem[] = [
   {
     href: "/jobs",
-    label: "Browse Jobs",
+    label: "Job Portal",
     icon: BriefcaseIcon,
     match: (p) => p === "/jobs" || p.startsWith("/jobs/"),
   },
   {
     href: "/directory",
-    label: "IT Directory",
+    label: "Directory Hub",
     icon: BookIcon,
     match: (p) => p === "/directory" || p.startsWith("/directory/"),
   },
   {
     href: "/equipment",
-    label: "Browse Equipment",
+    label: "Marketplace",
     icon: SearchIcon,
     match: (p) => p === "/equipment" || p.startsWith("/equipment/"),
   },

@@ -15,7 +15,7 @@ export default async function Nav() {
           </span>
           <span className="hidden h-3 w-px bg-line sm:block" />
           <span className="label-tag hidden text-[0.6rem] text-muted sm:inline">
-            SMAUDIR
+            SIIATCH
           </span>
         </Link>
 
@@ -24,20 +24,20 @@ export default async function Nav() {
             href="/jobs"
             className="hidden rounded-lg px-3 py-2 text-ink-700 transition-colors hover:bg-brand-50 hover:text-brand sm:inline-block"
           >
-            Browse Jobs
+            Job Portal
           </Link>
           <Link
             href="/directory"
             className="hidden rounded-lg px-3 py-2 text-ink-700 transition-colors hover:bg-brand-50 hover:text-brand sm:inline-block"
           >
-            IT Directory
+            Directory Hub
           </Link>
           {session?.role !== "STUDENT" && (
             <Link
               href="/equipment"
               className="hidden rounded-lg px-3 py-2 text-ink-700 transition-colors hover:bg-brand-50 hover:text-brand sm:inline-block"
             >
-              Lease Equipment
+              Marketplace
             </Link>
           )}
 

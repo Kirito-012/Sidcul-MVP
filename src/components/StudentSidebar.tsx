@@ -20,13 +20,13 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     href: "/jobs",
-    label: "Browse Jobs",
+    label: "Job Portal",
     icon: BriefcaseIcon,
     match: (p) => p === "/jobs" || p.startsWith("/jobs/"),
   },
   {
     href: "/directory",
-    label: "IT Directory",
+    label: "Directory Hub",
     icon: SearchIcon,
     match: (p) => p === "/directory" || p.startsWith("/directory/"),
   },

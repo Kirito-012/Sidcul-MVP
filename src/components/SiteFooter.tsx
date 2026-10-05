@@ -54,11 +54,29 @@ export default function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col gap-2 border-t border-white/10 pt-6 text-xs sm:flex-row sm:items-center sm:justify-between">
-          <p className="label-tag text-slate-500">
-            © {new Date().getFullYear()} SIDCUL Manufacturers Association
+        <div className="mt-12 flex flex-col gap-3 border-t border-white/10 pt-6 text-xs">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-center text-slate-500 sm:text-left">
+              © {new Date().getFullYear()} SIDCUL Manufacturers Association
+              <span className="mx-3 text-slate-700">·</span>
+              <span className="text-slate-600">Estate Reg. No. UK-SIDCUL-HW</span>
+            </p>
+            <p className="text-center text-slate-500 sm:text-right">
+              SMAU · © {new Date().getFullYear()} SIDCUL SMAU International Industry &amp; Trade
+              Chambers (SIIATCH)
+            </p>
+          </div>
+          <p className="text-center text-slate-500">
+            @Design &amp; Develop by{" "}
+            <a
+              href="http://www.thecraftsync.com/contact/"
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-slate-300 underline decoration-slate-600 underline-offset-4 transition-colors hover:text-brand"
+            >
+              The Craft Sync
+            </a>
           </p>
-          <p className="label-tag text-slate-600">Estate Reg. No. UK-SIDCUL-HW</p>
         </div>
       </div>
     </footer>
