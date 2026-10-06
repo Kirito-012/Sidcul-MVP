@@ -157,13 +157,13 @@ export default async function Home() {
       <section className="border-t border-line bg-canvas">
         <div className="mx-auto max-w-6xl px-5 py-14 sm:py-16">
           <SectionHead
-            eyebrow="Explore the estate"
-            title="Find companies by location"
-            right="Interactive map"
+            eyebrow="Master Plan 2025"
+            title="Explore IIE SIDCUL by sector"
+            right="1,695 Acres · Interactive map"
           />
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted">
-            Click a sector to see which registered companies are based
-            there.
+            Official layout of the SIDCUL Integrated Industrial Estate, Haridwar.
+            Select any sector, explore major arterial roads, or click industrial landmarks to inspect registered units.
           </p>
 
           <div className="mt-6">
