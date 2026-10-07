@@ -496,31 +496,6 @@ export default function EstateMap({
           </svg>
         </div>
 
-        {/* Map Legend Footer */}
-        <div className="mt-3.5 flex flex-wrap items-center justify-between gap-3 text-[0.75rem] text-muted">
-          <div className="flex flex-wrap items-center gap-4">
-            <span className="flex items-center gap-1.5">
-              <span className="h-3 w-3 rounded border border-[#6ee7b7] bg-[#d1fae5]" />
-              <span>70m Green Belt / Shivalik</span>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-3 w-3 rounded border border-[#7dd3fc] bg-[#e0f2fe]" />
-              <span>Rawli Rao Riverbed</span>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-1.5 w-4 rounded bg-[#ffffff] ring-1 ring-[#94a3b8]" />
-              <span>60M Spine Roads</span>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-3 w-3 rounded bg-brand" />
-              <span>Selected Sector</span>
-            </span>
-          </div>
-
-          <p className="text-[0.68rem] text-muted">
-            Directly modeled from SIIDCUL Haridwar Master Plan 2025.
-          </p>
-        </div>
       </div>
 
       {/* ============== SECTOR DETAIL INSPECTOR ============== */}
