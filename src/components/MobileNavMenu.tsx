@@ -101,6 +101,13 @@ export default function MobileNavMenu({
             >
               Directory Hub
             </Link>
+            <Link
+              href="/about"
+              onClick={closeMenu}
+              className="rounded-lg px-3 py-2.5 text-ink-700 transition-colors duration-200 hover:bg-brand-50 hover:text-brand"
+            >
+              About
+            </Link>
             {session?.role !== "STUDENT" && (
               <Link
                 href="/equipment"

@@ -11,6 +11,7 @@ import {
 import { INDIAN_PHONE_RE, OTHER_SECTOR_VALUE, type ActionState, type Role } from "@/lib/constants";
 import { uploadFileToCloudinary } from "@/lib/cloudinary";
 
+const AADHAAR_MAX_BYTES = 1024 * 1024; // 1 MB
 const MAX_DOC_BYTES = 8 * 1024 * 1024; // 8 MB
 
 /** Upload an optional signup document to Cloudinary; returns its URL or null. */
@@ -99,6 +100,27 @@ export async function registerAction(
     }
   }
 
+  let aadhaarDocumentUrl: string | null = null;
+  if (role === "STUDENT") {
+    const file = formData.get("aadhaarDocument");
+    if (!(file instanceof File) || file.size === 0) {
+      return { error: "Please upload your Aadhaar card (front and back) as a PDF." };
+    }
+    if (file.type !== "application/pdf" && !/\.pdf$/i.test(file.name)) {
+      return { error: "Aadhaar must be a PDF file." };
+    }
+    if (file.size > AADHAAR_MAX_BYTES) {
+      return { error: "Aadhaar PDF must be under 1 MB." };
+    }
+    try {
+      aadhaarDocumentUrl = (
+        await uploadFileToCloudinary(file, { folder: "sidcul/aadhaar-documents", kind: "auto" })
+      ).url;
+    } catch {
+      return { error: "Could not upload your Aadhaar. Please try again." };
+    }
+  }
+
   const passwordHash = await hashPassword(password);
 
   const user =
@@ -128,7 +150,7 @@ export async function registerAction(
             passwordHash,
             role: "STUDENT",
             name,
-            studentProfile: { create: { fullName: name } },
+            studentProfile: { create: { fullName: name, aadhaarDocumentUrl } },
           },
         });
 

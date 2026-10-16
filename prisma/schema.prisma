@@ -70,9 +70,13 @@ model StudentProfile {
   userId    String   @unique @db.ObjectId
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   fullName  String
+  aadhaarDocumentUrl String? // Aadhaar card (front + back) as one PDF, uploaded to Cloudinary at signup
   phone     String?
   education String?
   skills    String?
+  location   String? // city / area the job seeker lives in
+  experience String? // short work-experience summary
+  about      String? // short bio shown to companies
   createdAt DateTime @default(now())
 }
 

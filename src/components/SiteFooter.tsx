@@ -1,24 +1,28 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 
 export default function SiteFooter() {
+  const pathname = usePathname();
+  if (pathname === "/login" || pathname === "/register") return null;
+
   return (
     <footer className="border-t border-ink-950/10 bg-ink-950 text-slate-400">
       <div className="mx-auto max-w-6xl px-5 py-14">
         <div className="flex flex-col gap-10 sm:flex-row sm:justify-between">
           <div className="max-w-sm">
             <div className="flex items-center gap-3">
-              <span className="grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-xl bg-black ring-1 ring-white/10">
-                <Image
-                  src="/sidkullogo.jpeg"
-                  alt="SIDCUL Manufacturers Association"
-                  width={88}
-                  height={88}
-                  sizes="44px"
-                  loading="eager"
-                  className="h-full w-full object-cover"
-                />
-              </span>
+              <Image
+                src="/smau-logo.webp"
+                alt="SMAU International Industry & Trade Chambers"
+                width={1316}
+                height={1195}
+                sizes="80px"
+                loading="eager"
+                className="h-16 w-auto shrink-0 sm:h-20"
+              />
               <span className="font-display text-base font-bold tracking-tight text-white">
                 SIDCUL<span className="text-brand"> Hub</span>
               </span>
@@ -41,6 +45,9 @@ export default function SiteFooter() {
               <Link href="/equipment" className="transition-colors hover:text-white">
                 Lease equipment
               </Link>
+              <Link href="/about" className="transition-colors hover:text-white">
+                About SMAU
+              </Link>
             </nav>
             <nav className="flex flex-col gap-2.5 text-sm">
               <p className="label-tag mb-1 text-slate-500">Account</p>
@@ -56,12 +63,7 @@ export default function SiteFooter() {
 
         <div className="mt-12 flex flex-col gap-3 border-t border-white/10 pt-6 text-xs">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-center text-slate-500 sm:text-left">
-              © {new Date().getFullYear()} SIDCUL Manufacturers Association
-              <span className="mx-3 text-slate-700">·</span>
-              <span className="text-slate-600">Estate Reg. No. UK-SIDCUL-HW</span>
-            </p>
-            <p className="text-center text-slate-500 sm:text-right">
+            <p className="text-center text-slate-500 sm:w-full sm:text-center">
               SMAU · © {new Date().getFullYear()} SIDCUL SMAU International Industry &amp; Trade
               Chambers (SIIATCH)
             </p>

@@ -21,6 +21,8 @@ const EMPTY = {
   password: "",
 };
 
+const AADHAAR_MAX_BYTES = 1024 * 1024; // 1 MB
+
 const DOC_INPUT_CLASS =
   "input cursor-pointer file:mr-3 file:cursor-pointer file:rounded-md file:border-0 file:bg-accent file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white";
 
@@ -37,6 +39,20 @@ export default function RegisterForm() {
     (k: keyof typeof EMPTY) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
       setF((s) => ({ ...s, [k]: e.target.value }));
+
+  function checkAadhaarFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return setStepError(null);
+    if (file.type !== "application/pdf" && !/\.pdf$/i.test(file.name)) {
+      e.target.value = "";
+      return setStepError("Aadhaar must be a PDF file.");
+    }
+    if (file.size > AADHAAR_MAX_BYTES) {
+      e.target.value = "";
+      return setStepError("Aadhaar PDF must be under 1 MB.");
+    }
+    setStepError(null);
+  }
 
   function pickRole(next: "STUDENT" | "COMPANY") {
     setRole(next);
@@ -79,12 +95,12 @@ export default function RegisterForm() {
                 : "border-line bg-white text-ink-700 hover:border-brand/40"
             }`}
           >
-            {r === "STUDENT" ? "I'm a student" : "I'm a company"}
+            {r === "STUDENT" ? "I'm a job seeker" : "I'm a company"}
           </button>
         ))}
       </div>
 
-      {/* ---------------- STUDENT: single step ---------------- */}
+      {/* ---------------- JOB SEEKER: single step ---------------- */}
       {role === "STUDENT" && (
         <>
           <Field label="Full name" htmlFor="name">
@@ -120,6 +136,21 @@ export default function RegisterForm() {
               value={f.password}
               onChange={upd("password")}
             />
+          </Field>
+          <Field label="Aadhaar card (front & back, PDF)" htmlFor="aadhaarDocument">
+            <input
+              id="aadhaarDocument"
+              name="aadhaarDocument"
+              type="file"
+              accept="application/pdf,.pdf"
+              required
+              className={DOC_INPUT_CLASS}
+              onChange={checkAadhaarFile}
+            />
+            <p className="mt-1.5 text-xs text-muted">
+              Upload a single PDF showing both the front and back sides of your
+              Aadhaar card. Maximum size 1 MB.
+            </p>
           </Field>
           <SubmitButton pendingText="Creating account…">
             Create account

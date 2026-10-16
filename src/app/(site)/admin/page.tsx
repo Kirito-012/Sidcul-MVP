@@ -13,6 +13,12 @@ export default async function AdminDashboard() {
     },
   });
 
+  const seekers = await prisma.studentProfile.findMany({
+    orderBy: { createdAt: "desc" },
+    take: 200,
+    include: { user: { select: { email: true } } },
+  });
+
   const pending = companies.filter((c) => !c.verified).length;
 
   return (
@@ -66,6 +72,10 @@ export default async function AdminDashboard() {
                   📍 {company.mapUrl ? "View location" : "Search on Maps"}
                 </a>
               )}
+              <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                <DocLink href={company.gstDocumentUrl} label="GST certificate" />
+                <DocLink href={company.emDocumentUrl} label="EM Part 1" />
+              </div>
             </div>
 
             <form action={setCompanyVerifiedAction}>
@@ -87,6 +97,54 @@ export default async function AdminDashboard() {
           </div>
         ))}
       </div>
+
+      <h2 className="mt-12 text-xl font-bold text-ink">Job seekers</h2>
+      <p className="mt-1 text-sm text-muted">
+        {seekers.length} registered. Aadhaar documents are visible to admins only.
+      </p>
+      <div className="mt-4 space-y-3">
+        {seekers.length === 0 && (
+          <div className="card p-6 text-center text-sm text-muted">
+            No job seekers yet.
+          </div>
+        )}
+        {seekers.map((seeker) => (
+          <div
+            key={seeker.id}
+            className="card flex flex-wrap items-center justify-between gap-3 p-4"
+          >
+            <div className="min-w-0">
+              <p className="truncate font-semibold text-ink">{seeker.fullName}</p>
+              <p className="truncate text-sm text-muted">
+                {seeker.user.email}
+                {seeker.phone ? ` · ${seeker.phone}` : ""}
+              </p>
+            </div>
+            <DocLink href={seeker.aadhaarDocumentUrl} label="Aadhaar (front & back)" />
+          </div>
+        ))}
+      </div>
     </div>
+  );
+}
+
+/** Link to an uploaded document, or a muted "not provided" note. */
+function DocLink({ href, label }: { href: string | null; label: string }) {
+  if (!href) {
+    return (
+      <span className="rounded-md bg-canvas px-2 py-1 text-muted">
+        {label}: not provided
+      </span>
+    );
+  }
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="rounded-md border border-line bg-white px-2 py-1 font-medium text-brand transition-colors hover:border-brand/40 hover:bg-brand-50"
+    >
+      📄 {label}
+    </a>
   );
 }

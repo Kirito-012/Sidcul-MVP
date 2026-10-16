@@ -118,18 +118,18 @@ export default async function JobDetailPage({
             ) : !session ? (
               <div className="mt-3 space-y-3">
                 <p className="text-sm text-muted">
-                  Log in as a student to apply.
+                  Log in as a job seeker to apply.
                 </p>
                 <Link href="/login" className="btn btn-primary w-full">
                   Log in to apply
                 </Link>
                 <Link href="/register" className="btn btn-outline w-full">
-                  Create student account
+                  Create job seeker account
                 </Link>
               </div>
             ) : session.role !== "STUDENT" ? (
               <p className="mt-3 text-sm text-muted">
-                Only student accounts can apply to jobs.
+                Only job seeker accounts can apply to jobs.
               </p>
             ) : alreadyApplied ? (
               <div className="mt-3 rounded-lg bg-green-50 px-4 py-3 text-sm font-medium text-green-700">

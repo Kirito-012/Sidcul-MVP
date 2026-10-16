@@ -180,7 +180,7 @@ export default async function Home() {
             title="Companies by industry"
             right={`${distinctCategoryCount} active · ${DIRECTORY_CATEGORIES.length} total`}
           />
-          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 [&>*]:min-w-0">
             {DIRECTORY_CATEGORIES.map((cat) => (
               <CategoryCard
                 key={cat.dbCategory}
@@ -229,7 +229,7 @@ export default async function Home() {
               })}
             </div>
 
-            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 [&>*]:min-w-0">
               {companies.map((company) => (
                 <CompanyCard key={company.id} company={company} />
               ))}
@@ -366,14 +366,16 @@ function SectionHead({
 }) {
   return (
     <div className="rule flex items-end justify-between gap-4 pb-4">
-      <div>
+      <div className="min-w-0 flex-1">
         <p className="label-tag mb-2 text-brand">{eyebrow}</p>
         <h2 className="font-display text-2xl font-bold leading-tight text-ink sm:text-[1.9rem]">
           {title}
         </h2>
       </div>
       {right && (
-        <p className="label-tag hidden shrink-0 text-muted sm:block">{right}</p>
+        <div className="hidden shrink-0 md:block">
+          <p className="label-tag whitespace-nowrap text-muted">{right}</p>
+        </div>
       )}
     </div>
   );

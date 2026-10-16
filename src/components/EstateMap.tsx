@@ -115,7 +115,7 @@ export default function EstateMap({
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1.55fr_1fr] lg:items-start">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.55fr_1fr] lg:items-start [&>*]:min-w-0">
       {/* ============== MAP CANVAS ============== */}
       <div className="relative overflow-hidden rounded-2xl border border-line bg-[#fdfbf7] p-4 shadow-sm sm:p-6">
         {/* Top Header & Map Controls */}
@@ -201,7 +201,7 @@ export default function EstateMap({
             width={904}
             height={748}
             priority
-            className="h-auto w-full select-none"
+            className="h-auto w-full select-none grayscale"
           />
           <svg
             viewBox="0 0 904 748"
@@ -218,10 +218,10 @@ export default function EstateMap({
                 <g key={sectorPolygon.id}>
                   <polygon
                     points={sectorPolygon.points}
-                    fill="transparent"
-                    stroke={isSelected || isHovered ? "#c1121f" : "transparent"}
-                    strokeWidth={isSelected ? 2.5 : 1.5}
-                    className="pointer-events-auto cursor-pointer transition-all duration-200"
+                    fill={isSelected ? "#c1121f" : "transparent"}
+                    stroke={isSelected ? "#7f0b14" : "transparent"}
+                    strokeWidth={1.5}
+                    className="pointer-events-auto cursor-pointer outline-none mix-blend-multiply transition-all duration-200 focus:outline-none"
                     tabIndex={0}
                     role="button"
                     aria-label={`Select ${sector.label}, ${sector.companies.length} companies`}
@@ -238,13 +238,29 @@ export default function EstateMap({
                       }
                     }}
                   />
+                  {isSelected && (
+                    <>
+                      <clipPath id="selected-sector-clip">
+                        <polygon points={sectorPolygon.points} />
+                      </clipPath>
+                      {/* Re-draw the map's own labels inside the red sector, inverted to white */}
+                      <image
+                        href="/haridwar_sectors.svg"
+                        width={904}
+                        height={748}
+                        clipPath="url(#selected-sector-clip)"
+                        className="pointer-events-none"
+                        style={{ mixBlendMode: "screen", filter: "grayscale(1) invert(1) contrast(4)" }}
+                      />
+                    </>
+                  )}
                   <text
                     x={sectorPolygon.points.split(" ")[0].split(",")[0]}
                     y={sectorPolygon.points.split(" ")[0].split(",")[1]}
                     dx="8"
                     dy="16"
                     className="pointer-events-none select-none font-mono text-[12px] font-bold"
-                    fill={isSelected ? "#c1121f" : "#334155"}
+                    fill="#334155"
                   >
                     {sector.shortLabel}
                   </text>

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useActionState, useId, useState } from "react";
+import { useActionState, useId, useRef, useState } from "react";
 import { updateCompanyMediaAction } from "@/lib/actions/company-actions";
 import { type ActionState } from "@/lib/constants";
 import SubmitButton from "@/components/forms/SubmitButton";
@@ -60,11 +60,12 @@ function ImageField({
   name: string;
   label: string;
   current: string | null;
-  variant: "avatar" | "photo";
+  variant: "avatar" | "photo" | "slide";
 }) {
   const inputId = useId();
   const [preview, setPreview] = useState<string | null>(null);
   const [removed, setRemoved] = useState(false);
+  const [zoomed, setZoomed] = useState(false);
 
   const shown = removed ? null : (preview ?? current);
   const removeName = `remove${name[0].toUpperCase()}${name.slice(1)}`;
@@ -72,7 +73,9 @@ function ImageField({
   const frame =
     variant === "avatar"
       ? "aspect-square w-28 rounded-2xl"
-      : "aspect-[4/3] w-full rounded-xl";
+      : variant === "slide"
+        ? "aspect-[16/10] w-full rounded-xl"
+        : "aspect-[4/3] w-full rounded-xl";
 
   return (
     <div>
@@ -85,22 +88,30 @@ function ImageField({
         >
           {shown ? (
             <>
-              <Image
-                src={shown}
-                alt=""
-                fill
-                sizes={variant === "avatar" ? "112px" : "360px"}
-                className="object-cover"
-                unoptimized={shown.startsWith("blob:")}
-              />
-              <label
-                htmlFor={inputId}
-                className="absolute inset-0 flex cursor-pointer items-end justify-center bg-gradient-to-t from-black/55 to-transparent p-2 opacity-0 transition-opacity group-hover:opacity-100"
+              <button
+                type="button"
+                onClick={() => setZoomed(true)}
+                aria-label="View image full size"
+                className="absolute inset-0 cursor-zoom-in"
               >
-                <span className="rounded-md bg-white/95 px-2 py-1 text-[0.7rem] font-semibold text-ink">
+                <Image
+                  src={shown}
+                  alt=""
+                  fill
+                  sizes={variant === "avatar" ? "112px" : "(min-width: 768px) 640px, 100vw"}
+                  className="object-cover"
+                  unoptimized={shown.startsWith("blob:")}
+                />
+              </button>
+              {variant !== "avatar" && (
+                <label
+                  htmlFor={inputId}
+                  className="absolute bottom-2 right-2 inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-white/95 px-3 py-1.5 text-xs font-semibold text-ink shadow-md transition-colors hover:bg-white"
+                >
+                  <UploadIcon className="h-3.5 w-3.5" />
                   Change
-                </span>
-              </label>
+                </label>
+              )}
               {current && !preview && (
                 <button
                   type="button"
@@ -149,6 +160,37 @@ function ImageField({
         )}
       </div>
 
+      {zoomed && shown && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Image preview"
+          onClick={() => setZoomed(false)}
+          onKeyDown={(e) => e.key === "Escape" && setZoomed(false)}
+          className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-3 bg-black/85 p-4 sm:p-8"
+        >
+          <div className="flex max-w-full flex-col items-end gap-3">
+            <button
+              type="button"
+              autoFocus
+              onClick={() => setZoomed(false)}
+              aria-label="Close preview"
+              className="grid h-10 w-10 cursor-pointer place-items-center rounded-full bg-white/15 text-white transition-colors hover:bg-white/25"
+            >
+              <XIcon className="h-5 w-5" />
+            </button>
+            {/* Plain <img>: sizes to the picture so the close button hugs it. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={shown}
+              alt=""
+              onClick={(e) => e.stopPropagation()}
+              className="max-h-[75vh] max-w-full rounded-lg object-contain"
+            />
+          </div>
+        </div>
+      )}
+
       <input
         id={inputId}
         name={name}
@@ -165,6 +207,96 @@ function ImageField({
       {removed && !preview && (
         <input type="checkbox" name={removeName} defaultChecked hidden readOnly />
       )}
+    </div>
+  );
+}
+
+function ChevronIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/**
+ * Swipeable scroll-snap carousel. Every slide stays mounted so each slide's
+ * file input is still part of the form when it is submitted.
+ */
+function GalleryCarousel({ children }: { children: React.ReactNode[] }) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [index, setIndex] = useState(0);
+  const count = children.length;
+
+  function go(i: number) {
+    const track = trackRef.current;
+    if (!track) return;
+    const next = Math.max(0, Math.min(count - 1, i));
+    track.scrollTo({ left: next * track.clientWidth, behavior: "smooth" });
+    setIndex(next);
+  }
+
+  return (
+    <div className="mx-auto w-full max-w-2xl">
+      <div className="relative">
+        <div
+          ref={trackRef}
+          onScroll={(e) => {
+            const t = e.currentTarget;
+            setIndex(Math.round(t.scrollLeft / t.clientWidth));
+          }}
+          className="flex snap-x snap-mandatory overflow-x-auto scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {children.map((child, i) => (
+            <div
+              key={i}
+              aria-roledescription="slide"
+              aria-label={`Photo ${i + 1} of ${count}`}
+              className="w-full shrink-0 snap-center px-px"
+            >
+              {child}
+            </div>
+          ))}
+        </div>
+
+        {count > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={() => go(index - 1)}
+              disabled={index === 0}
+              aria-label="Previous photo"
+              className="absolute left-2 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full bg-white/95 text-ink shadow-md transition-opacity hover:bg-white disabled:pointer-events-none disabled:opacity-0"
+            >
+              <ChevronIcon className="h-4 w-4 rotate-180" />
+            </button>
+            <button
+              type="button"
+              onClick={() => go(index + 1)}
+              disabled={index === count - 1}
+              aria-label="Next photo"
+              className="absolute right-2 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full bg-white/95 text-ink shadow-md transition-opacity hover:bg-white disabled:pointer-events-none disabled:opacity-0"
+            >
+              <ChevronIcon className="h-4 w-4" />
+            </button>
+          </>
+        )}
+      </div>
+
+      <div className="mt-3 flex items-center justify-center gap-2" role="group" aria-label="Choose photo">
+        {children.map((_, i) => (
+          <button
+            key={i}
+            type="button"
+            onClick={() => go(i)}
+            aria-label={`Show photo ${i + 1}`}
+            aria-current={i === index}
+            className={`h-2 rounded-full transition-all ${
+              i === index ? "w-6 bg-brand" : "w-2 bg-line hover:bg-muted/50"
+            }`}
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -352,20 +484,24 @@ export default function CompanyMediaForm({
         <p className="-mt-1 mb-2 text-xs text-muted">
           Up to two — facility, product or team shots.
         </p>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <ImageField
-            name="gallery1"
-            label="Photo 1"
-            current={galleryImage1Url}
-            variant="photo"
-          />
-          <ImageField
-            name="gallery2"
-            label="Photo 2"
-            current={galleryImage2Url}
-            variant="photo"
-          />
-        </div>
+        <GalleryCarousel>
+          {[
+            <ImageField
+              key="g1"
+              name="gallery1"
+              label="Photo 1"
+              current={galleryImage1Url}
+              variant="slide"
+            />,
+            <ImageField
+              key="g2"
+              name="gallery2"
+              label="Photo 2"
+              current={galleryImage2Url}
+              variant="slide"
+            />,
+          ]}
+        </GalleryCarousel>
       </div>
 
       <div className="mt-6 border-t border-line pt-5">

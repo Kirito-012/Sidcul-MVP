@@ -43,7 +43,7 @@ export default async function RegisterPage() {
             Join the hyper-local hiring network for the SIDCUL estate.
           </p>
           <p className="mt-3 text-sm text-slate-300">
-            Students apply directly to verified manufacturers. Companies
+            Job seekers apply directly to verified manufacturers. Companies
             post roles without paying recruiter fees.
           </p>
         </div>
