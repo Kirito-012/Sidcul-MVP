@@ -97,7 +97,7 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <div className="mx-auto w-full max-w-[16rem] lg:max-w-xs">
+          <div className="mx-auto hidden w-full max-w-[16rem] md:block lg:max-w-xs">
             <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
               <Image
                 src="/smau-logo.webp"
