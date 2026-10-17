@@ -61,7 +61,7 @@ export default async function Home() {
       <section className="relative overflow-hidden bg-ink-950 text-white">
         <div className="pointer-events-none absolute inset-0">
           <Image
-            src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Har_Ki_Pauri_and_Clock_Tower_of_Haridwar.jpg/1920px-Har_Ki_Pauri_and_Clock_Tower_of_Haridwar.jpg"
+            src="/hari-ki-pauri.webp"
             alt=""
             fill
             priority
@@ -249,7 +249,7 @@ export default async function Home() {
       <section className="relative overflow-hidden border-t border-line">
         <div className="relative h-[240px] w-full sm:h-[300px]">
           <Image
-            src="https://images.unsplash.com/photo-1587293852726-70cdb56c2866?w=1600&q=80&auto=format&fit=crop"
+            src="/industrial-units.webp"
             alt="Manufacturing and warehousing units in the SIDCUL industrial estate"
             fill
             sizes="100vw"
@@ -311,7 +311,7 @@ export default async function Home() {
       <section className="relative overflow-hidden bg-ink-950 text-white">
         <div className="pointer-events-none absolute inset-0">
           <Image
-            src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Haridwar_from_Mansa_Devi_road.jpg/1280px-Haridwar_from_Mansa_Devi_road.jpg"
+            src="/haridwar-mansa-devi.webp"
             alt=""
             fill
             sizes="100vw"

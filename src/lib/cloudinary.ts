@@ -34,8 +34,20 @@ export async function uploadFileToCloudinary(
     resource_type: kind === "image" ? "image" : "auto",
     // Auto-format + auto-quality: Cloudinary picks the best codec
     // (e.g. WebP/AVIF) and compression for the requesting browser.
+    // Cap the stored original at 1600px on its long edge so phone-camera
+    // uploads (often 4000px+, several MB) never get stored or served as-is.
     transformation:
-      kind === "image" ? [{ fetch_format: "auto", quality: "auto" }] : undefined,
+      kind === "image"
+        ? [
+            {
+              width: 1600,
+              height: 1600,
+              crop: "limit",
+              fetch_format: "auto",
+              quality: "auto",
+            },
+          ]
+        : undefined,
   });
 
   return { url: result.secure_url, publicId: result.public_id };

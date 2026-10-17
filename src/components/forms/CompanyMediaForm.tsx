@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import CloudImage, { cloudinaryUrl } from "@/components/CloudImage";
 import { useActionState, useId, useRef, useState } from "react";
 import { updateCompanyMediaAction } from "@/lib/actions/company-actions";
 import { type ActionState } from "@/lib/constants";
@@ -94,13 +94,12 @@ function ImageField({
                 aria-label="View image full size"
                 className="absolute inset-0 cursor-zoom-in"
               >
-                <Image
+                <CloudImage
                   src={shown}
                   alt=""
                   fill
                   sizes={variant === "avatar" ? "112px" : "(min-width: 768px) 640px, 100vw"}
                   className="object-cover"
-                  unoptimized={shown.startsWith("blob:")}
                 />
               </button>
               {variant !== "avatar" && (
@@ -182,7 +181,7 @@ function ImageField({
             {/* Plain <img>: sizes to the picture so the close button hugs it. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={shown}
+              src={shown.includes("res.cloudinary.com") ? cloudinaryUrl(shown, 1600) : shown}
               alt=""
               onClick={(e) => e.stopPropagation()}
               className="max-h-[75vh] max-w-full rounded-lg object-contain"

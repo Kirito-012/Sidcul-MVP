@@ -1,4 +1,5 @@
 import Image from "next/image";
+import CloudImage from "@/components/CloudImage";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -80,7 +81,7 @@ export default async function DirectoryCompanyPage({
       <section className="relative overflow-hidden bg-ink-950 text-white">
         <div className="pointer-events-none absolute inset-0">
           <Image
-            src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Haridwar_from_Mansa_Devi_road.jpg/1280px-Haridwar_from_Mansa_Devi_road.jpg"
+            src="/haridwar-mansa-devi.webp"
             alt=""
             fill
             sizes="100vw"
@@ -102,7 +103,7 @@ export default async function DirectoryCompanyPage({
           <div className="mt-6 flex items-start gap-4 sm:gap-5">
             <span className="relative grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-2xl bg-ink font-display text-xl font-bold text-white ring-1 ring-inset ring-white/15 sm:h-20 sm:w-20 sm:text-2xl">
               {owner?.logoUrl ? (
-                <Image
+                <CloudImage
                   src={owner.logoUrl}
                   alt={`${company.name} logo`}
                   fill
@@ -148,7 +149,7 @@ export default async function DirectoryCompanyPage({
                   key={i}
                   className="relative aspect-[4/3] overflow-hidden rounded-xl bg-canvas ring-1 ring-inset ring-line"
                 >
-                  <Image
+                  <CloudImage
                     src={src}
                     alt={`${company.name} — photo ${i + 1}`}
                     fill

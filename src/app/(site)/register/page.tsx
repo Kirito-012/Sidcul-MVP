@@ -13,7 +13,7 @@ export default async function RegisterPage() {
       <div className="relative hidden overflow-hidden bg-ink-950 lg:flex lg:flex-col lg:justify-between lg:p-12">
         <div className="pointer-events-none absolute inset-0">
           <Image
-            src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Haridwar_from_Mansa_Devi_road.jpg/1280px-Haridwar_from_Mansa_Devi_road.jpg"
+            src="/haridwar-mansa-devi.webp"
             alt=""
             fill
             sizes="50vw"

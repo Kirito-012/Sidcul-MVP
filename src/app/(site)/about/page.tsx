@@ -9,11 +9,11 @@ export const metadata: Metadata = {
 };
 
 const HERO_IMG =
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Har_Ki_Pauri_and_Clock_Tower_of_Haridwar.jpg/1920px-Har_Ki_Pauri_and_Clock_Tower_of_Haridwar.jpg";
+  "/hari-ki-pauri.webp";
 const FACTORY_IMG =
-  "https://images.unsplash.com/photo-1587293852726-70cdb56c2866?w=1600&q=80&auto=format&fit=crop";
+  "/industrial-units.webp";
 const ESTATE_IMG =
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Haridwar_from_Mansa_Devi_road.jpg/1280px-Haridwar_from_Mansa_Devi_road.jpg";
+  "/haridwar-mansa-devi.webp";
 
 const AUDIENCE = [
   "Manufacturers",
