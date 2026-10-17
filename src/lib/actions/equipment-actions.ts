@@ -130,6 +130,7 @@ export async function createLeaseRequestAction(
   });
 
   revalidatePath(`/equipment/${equipmentId}`);
+  revalidatePath("/company/equipment");
   revalidatePath("/company/leases");
   return { success: true };
 }
@@ -188,6 +189,7 @@ export async function updateLeaseRequestStatusAction(
   });
 
   revalidatePath(`/company/equipment/${leaseRequest.equipmentId}`);
+  revalidatePath("/company/equipment");
   revalidatePath("/company/leases");
   return { success: true };
 }

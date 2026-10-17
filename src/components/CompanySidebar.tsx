@@ -21,7 +21,7 @@ const MANAGE_ITEMS: NavItem[] = [
   },
   {
     href: "/company/equipment",
-    label: "Equipment",
+    label: "Your Equipments",
     icon: ToolIcon,
     match: (p) => p.startsWith("/company/equipment"),
   },
